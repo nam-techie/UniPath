@@ -1,0 +1,69 @@
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Be Vietnam Pro", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Public Sans", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  /* Primary palette */
+  --color-primary: #001e40;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #003366;
+  --color-on-primary-container: #d0e4ff;
+
+  /* Secondary palette */
+  --color-secondary: #006c49;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #6cf8bb;
+  --color-on-secondary-container: #002115;
+
+  /* Tertiary palette */
+  --color-tertiary: #2e1a00;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #4b2d00;
+  --color-on-tertiary-container: #ffddb5;
+
+  /* Error palette */
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #410002;
+
+  /* Background & Surface */
+  --color-background: #f8f9ff;
+  --color-on-background: #0b1c30;
+  --color-surface: #ffffff;
+  --color-on-surface: #0b1c30;
+  --color-surface-variant: #e0e2ec;
+  --color-on-surface-variant: #43474f;
+  --color-surface-container-low: #f8fafc;
+  --color-surface-container: #f1f5f9;
+  --color-surface-container-high: #e8edf5;
+  --color-surface-container-highest: #dde3ef;
+
+  /* Outline */
+  --color-outline: #737780;
+  --color-outline-variant: #c3c6d1;
+
+  /* Container max width */
+  --container-max: 1280px;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-on-surface font-sans antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-semibold tracking-tight;
+  }
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
