@@ -4,6 +4,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.unipath.common.enums.DegreeLevel;
 import com.unipath.program.entity.Program;
 
 import java.math.BigDecimal;
@@ -23,8 +24,17 @@ public class AdmissionRequirement {
     private Integer minimumToefl;
 
     private Integer minimumSat;
+    private Integer minimumGre;
+    private Integer minimumGmat;
+    private DegreeLevel requiredPreviousDegreeLevel;
+    private Boolean requiredPreviousFieldRelated;
+    private Integer minimumWorkExperienceMonths;
     private Boolean portfolioRequired;
     private Boolean interviewRequired;
+    private Boolean researchProposalRequired;
+    private Boolean supervisorAcceptanceRequired;
+    private Integer referenceLetterCount;
+    private Boolean fundingProofRequired;
     private String note;
     private String sourceUrl;
 

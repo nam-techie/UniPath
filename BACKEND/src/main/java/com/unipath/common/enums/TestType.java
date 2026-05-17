@@ -4,5 +4,9 @@ public enum TestType {
     IELTS,
     TOEFL,
     SAT,
-    ACT
+    ACT,
+    GRE,
+    GMAT,
+    PTE,
+    DUOLINGO
 }

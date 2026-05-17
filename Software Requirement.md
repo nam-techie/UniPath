@@ -190,7 +190,29 @@ GET /api/v1/admin/users
 
 ## 4.3. Student Profile Module
 
-Purpose: Store student academic data and preferences.
+Purpose: Store student academic data and preferences based on the student's current education stage and target degree level.
+
+Important product decision:
+
+- `currentEducationStage` describes where the student is now.
+- `targetDegreeLevel` describes what the student wants to apply for.
+- Bachelor, Master, and PhD applicants should not use the exact same input form or recommendation rules.
+
+Supported applicant stages:
+
+```text
+HIGH_SCHOOL:
+- Usually applies for Bachelor, Diploma, Certificate, or pathway programs.
+- Main evidence: high school GPA, predicted/achieved graduation results, English score, optional SAT/ACT.
+
+UNDERGRADUATE:
+- Usually applies for Master, Graduate Diploma, or conversion programs.
+- Main evidence: bachelor major, bachelor GPA, academic transcript, English score, optional GRE/GMAT, work experience, portfolio.
+
+POSTGRADUATE:
+- Usually applies for PhD or research Master.
+- Main evidence: master/bachelor academic record, research interests, thesis, publications, proposal, supervisor fit, references, funding need.
+```
 
 APIs:
 
@@ -206,15 +228,28 @@ DELETE /api/v1/student-profiles/me/test-scores/{id}
 
 Important fields:
 
+- Current education stage
+- Target degree level
 - GPA value
 - GPA scale
+- Normalized GPA
+- Previous institution
+- Previous major
 - English test type
 - English test score
-- Degree level
 - Preferred countries
 - Preferred fields
 - Yearly budget
 - Scholarship need
+- Work experience
+- Research interests
+- Research proposal status
+
+Profile completeness rules:
+
+- Bachelor recommendation requires at least current stage, target degree, GPA, GPA scale, preferred field, budget, and budget currency.
+- Master recommendation requires at least current stage, target degree, bachelor major, bachelor GPA, GPA scale, preferred field, budget, and budget currency.
+- PhD recommendation requires at least current stage, target degree, research interests, highest previous degree, academic GPA, and funding preference. PhD support is limited in MVP unless supervisor, research area, and funding data are available.
 
 ## 4.4. Education Data Module
 
@@ -341,6 +376,8 @@ REACH:
 
 ## 5.2. Scoring Weights
 
+Default scoring for Bachelor and general coursework programs:
+
 ```text
 Total Score = 100
 
@@ -351,6 +388,35 @@ Field Preference Match: 15
 Country Preference Match: 10
 Scholarship Support: 5
 ```
+
+Master coursework scoring should add program-fit checks:
+
+```text
+Total Score = 100
+
+Previous GPA Match: 25
+Major / prerequisite fit: 20
+English Match: 20
+Budget Match: 15
+Field Preference Match: 10
+Country Preference Match: 5
+Work Experience / Portfolio / Test Support: 5
+```
+
+PhD and research degree scoring should not be treated as a normal GPA-only recommendation. If PhD is enabled, use this direction:
+
+```text
+Total Score = 100
+
+Research fit: 30
+Supervisor / research area availability: 20
+Funding fit: 20
+Academic record: 15
+English Match: 10
+Publication / research experience support: 5
+```
+
+MVP recommendation should support Bachelor and Master coursework first. PhD can be stored as a target and shown as limited support until the database contains supervisor, research area, and funding data.
 
 ## 5.3. GPA Rule
 
@@ -372,6 +438,12 @@ If student GPA is more than 0.5 below minimum GPA:
 ```
 
 All GPA values should be normalized to a 4.0 scale before scoring.
+
+For Bachelor applicants, GPA usually comes from high school.
+
+For Master applicants, GPA usually comes from the bachelor's degree.
+
+For PhD applicants, GPA can come from the highest relevant previous degree. Research fit and supervisor/funding availability should carry more weight than GPA alone.
 
 ## 5.4. English Rule
 
@@ -453,6 +525,9 @@ Program 1-n ProgramTuitionFee
 Program n-n Scholarship through ProgramScholarship
 
 StudentProfile 1-n StudentTestScore
+StudentProfile 0-1 HighSchoolAcademicProfile
+StudentProfile 0-1 UndergraduateAcademicProfile
+StudentProfile 0-1 PostgraduateAcademicProfile
 StudentProfile n-n Country through StudentPreferredCountry
 StudentProfile n-n FieldOfStudy through StudentPreferredField
 
@@ -480,19 +555,87 @@ Fields:
 
 - id
 - userId
+- currentEducationStage
 - gpaValue
 - gpaScale
 - normalizedGpa
 - graduationYear
+- highestCompletedDegreeLevel
 - targetDegreeLevel
+- targetProgramTrack
 - yearlyBudgetAmount
 - budgetCurrency
 - scholarshipNeed
 - careerGoal
+- workExperienceMonths
+- portfolioUrl
+- researchInterests
+- researchProposalStatus
+- fundingNeed
 - createdAt
 - updatedAt
 
-## 6.4. StudentTestScore
+Notes:
+
+- `gpaValue`, `gpaScale`, and `normalizedGpa` represent the primary GPA used by the current recommendation flow.
+- For Bachelor applicants, this is usually high school GPA.
+- For Master applicants, this is usually undergraduate GPA.
+- For PhD applicants, this is usually the most relevant previous degree GPA.
+- Stage-specific entities preserve richer source data without overloading the main profile.
+
+## 6.4. HighSchoolAcademicProfile
+
+Fields:
+
+- id
+- studentProfileId
+- schoolName
+- curriculumType
+- highSchoolGpa
+- highSchoolGpaScale
+- normalizedHighSchoolGpa
+- predictedGraduationYear
+- nationalExamScore
+- academicAwards
+
+## 6.5. UndergraduateAcademicProfile
+
+Fields:
+
+- id
+- studentProfileId
+- institutionName
+- majorName
+- degreeName
+- gpaValue
+- gpaScale
+- normalizedGpa
+- graduationYear
+- workExperienceMonths
+- portfolioUrl
+- prerequisiteSummary
+
+## 6.6. PostgraduateAcademicProfile
+
+Fields:
+
+- id
+- studentProfileId
+- institutionName
+- majorName
+- degreeName
+- gpaValue
+- gpaScale
+- normalizedGpa
+- graduationYear
+- thesisTitle
+- researchInterests
+- publications
+- researchExperienceMonths
+- researchProposalStatus
+- preferredSupervisorKeywords
+
+## 6.7. StudentTestScore
 
 Fields:
 
@@ -508,8 +651,11 @@ Examples:
 - IELTS 6.5
 - TOEFL 90
 - SAT 1350
+- GRE 320
+- GMAT 680
+- PTE 65
 
-## 6.5. StudentPreferredCountry
+## 6.8. StudentPreferredCountry
 
 Fields:
 
@@ -517,7 +663,7 @@ Fields:
 - studentProfileId
 - countryId
 
-## 6.6. StudentPreferredField
+## 6.9. StudentPreferredField
 
 Fields:
 
@@ -525,7 +671,7 @@ Fields:
 - studentProfileId
 - fieldOfStudyId
 
-## 6.7. Country
+## 6.10. Country
 
 Fields:
 
@@ -537,7 +683,7 @@ Fields:
 - visaDifficulty
 - status
 
-## 6.8. LivingCost
+## 6.11. LivingCost
 
 Fields:
 
@@ -550,7 +696,7 @@ Fields:
 - sourceUrl
 - lastCheckedAt
 
-## 6.9. University
+## 6.12. University
 
 Fields:
 
@@ -564,7 +710,7 @@ Fields:
 - description
 - status
 
-## 6.10. FieldOfStudy
+## 6.13. FieldOfStudy
 
 Fields:
 
@@ -574,7 +720,7 @@ Fields:
 - description
 - status
 
-## 6.11. Program
+## 6.14. Program
 
 Fields:
 
@@ -583,6 +729,7 @@ Fields:
 - fieldOfStudyId
 - name
 - degreeLevel
+- programTrack
 - studyMode
 - durationMonths
 - teachingLanguage
@@ -590,7 +737,7 @@ Fields:
 - description
 - status
 
-## 6.12. AdmissionRequirement
+## 6.15. AdmissionRequirement
 
 Fields:
 
@@ -601,13 +748,22 @@ Fields:
 - minimumIelts
 - minimumToefl
 - minimumSat
+- minimumGre
+- minimumGmat
+- requiredPreviousDegreeLevel
+- requiredPreviousFieldRelated
+- minimumWorkExperienceMonths
 - portfolioRequired
 - interviewRequired
+- researchProposalRequired
+- supervisorAcceptanceRequired
+- referenceLetterCount
+- fundingProofRequired
 - note
 - sourceUrl
 - lastCheckedAt
 
-## 6.13. ProgramTuitionFee
+## 6.16. ProgramTuitionFee
 
 Fields:
 
@@ -625,7 +781,7 @@ Important rule:
 - Store original currency and original amount.
 - Convert currency only when displaying or estimating.
 
-## 6.14. Scholarship
+## 6.17. Scholarship
 
 Fields:
 
@@ -647,7 +803,7 @@ Fields:
 - lastCheckedAt
 - status
 
-## 6.15. ProgramScholarship
+## 6.18. ProgramScholarship
 
 Fields:
 
@@ -655,7 +811,7 @@ Fields:
 - programId
 - scholarshipId
 
-## 6.16. RecommendationResult
+## 6.19. RecommendationResult
 
 Fields:
 
@@ -665,7 +821,7 @@ Fields:
 - totalProgramsConsidered
 - note
 
-## 6.17. RecommendationDetail
+## 6.20. RecommendationDetail
 
 Fields:
 
@@ -678,7 +834,7 @@ Fields:
 - costCurrency
 - explanation
 
-## 6.18. MatchReason
+## 6.21. MatchReason
 
 Fields:
 
@@ -697,7 +853,7 @@ Examples:
 - COUNTRY_MATCH
 - SCHOLARSHIP_SUPPORT
 
-## 6.19. SavedShortlist
+## 6.22. SavedShortlist
 
 Fields:
 
@@ -737,7 +893,35 @@ DIPLOMA
 CERTIFICATE
 ```
 
-## 7.4. StudyMode
+## 7.4. CurrentEducationStage
+
+```text
+HIGH_SCHOOL
+UNDERGRADUATE
+POSTGRADUATE
+WORKING_PROFESSIONAL
+```
+
+## 7.5. ProgramTrack
+
+```text
+COURSEWORK
+RESEARCH
+CONVERSION
+PATHWAY
+PROFESSIONAL
+```
+
+## 7.6. ResearchProposalStatus
+
+```text
+NOT_STARTED
+DRAFT
+READY
+SUBMITTED
+```
+
+## 7.7. StudyMode
 
 ```text
 ON_CAMPUS
@@ -745,14 +929,14 @@ ONLINE
 HYBRID
 ```
 
-## 7.5. InstitutionType
+## 7.8. InstitutionType
 
 ```text
 PUBLIC
 PRIVATE
 ```
 
-## 7.6. RecordStatus
+## 7.9. RecordStatus
 
 ```text
 ACTIVE
@@ -760,16 +944,20 @@ INACTIVE
 DRAFT
 ```
 
-## 7.7. TestType
+## 7.10. TestType
 
 ```text
 IELTS
 TOEFL
 SAT
 ACT
+GRE
+GMAT
+PTE
+DUOLINGO
 ```
 
-## 7.8. CurrencyCode
+## 7.11. CurrencyCode
 
 ```text
 VND
@@ -781,7 +969,7 @@ SGD
 JPY
 ```
 
-## 7.9. FeePeriod
+## 7.12. FeePeriod
 
 ```text
 PER_YEAR
@@ -789,14 +977,14 @@ PER_SEMESTER
 FULL_PROGRAM
 ```
 
-## 7.10. StudentType
+## 7.13. StudentType
 
 ```text
 INTERNATIONAL
 DOMESTIC
 ```
 
-## 7.11. ScholarshipProviderType
+## 7.14. ScholarshipProviderType
 
 ```text
 UNIVERSITY
@@ -805,7 +993,7 @@ PRIVATE
 ORGANIZATION
 ```
 
-## 7.12. ScholarshipCoverageType
+## 7.15. ScholarshipCoverageType
 
 ```text
 FULL
@@ -815,7 +1003,7 @@ LIVING_COST
 FIXED_AMOUNT
 ```
 
-## 7.13. MatchCategory
+## 7.16. MatchCategory
 
 ```text
 SAFE
@@ -823,7 +1011,7 @@ MATCH
 REACH
 ```
 
-## 7.14. MatchReasonType
+## 7.17. MatchReasonType
 
 ```text
 GPA_MATCH
@@ -834,7 +1022,7 @@ COUNTRY_MATCH
 SCHOLARSHIP_SUPPORT
 ```
 
-## 7.15. ShortlistStatus
+## 7.18. ShortlistStatus
 
 ```text
 SAVED
@@ -1138,19 +1326,26 @@ Deliverable:
 
 ## Phase 4: Student Profile
 
-Goal: Store student academic data and preferences.
+Goal: Store student academic data and preferences for Bachelor, Master, and limited PhD recommendation flows.
 
 Tasks:
 
 - Student profile CRUD
+- Current education stage and target degree level handling
+- Stage-specific academic profile storage
 - Test score CRUD
 - Preferred countries
 - Preferred fields
 - GPA normalization
+- Profile completeness validation by target degree level
+- Master-specific prerequisite, work experience, and portfolio fields
+- PhD-specific research interest, proposal, publication, reference, and funding fields
 
 Deliverable:
 
-- Student can complete recommendation profile
+- Student can complete a recommendation profile that matches their applicant stage.
+- Bachelor and Master coursework profiles can be used directly by recommendation.
+- PhD profiles can be stored and assessed with limited recommendation support until supervisor, research area, and funding data are available.
 
 ## Phase 5: Recommendation Engine
 

@@ -5,6 +5,7 @@ import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.unipath.common.enums.DegreeLevel;
+import com.unipath.common.enums.ProgramTrack;
 import com.unipath.common.enums.RecordStatus;
 import com.unipath.common.enums.StudyMode;
 import com.unipath.fieldofstudy.entity.FieldOfStudy;
@@ -21,6 +22,7 @@ public class Program {
     private FieldOfStudy fieldOfStudy;
     private String name;
     private DegreeLevel degreeLevel;
+    private ProgramTrack programTrack;
     private StudyMode studyMode;
 
     private Integer durationMonths;
