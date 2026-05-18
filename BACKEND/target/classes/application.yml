@@ -1,0 +1,44 @@
+spring:
+  config:
+    import:
+      - optional:file:.env[.properties]
+      - optional:file:BACKEND/.env[.properties]
+  application:
+    name: unipath-backend
+  data:
+    mongodb:
+        uri: ${MONGODB_URI:mongodb://localhost:27017/unipath}
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+server:
+  port: 8080
+
+app:
+  backend:
+    base-url: ${BACKEND_BASE_URL:http://localhost:8080}
+  auth:
+    jwt-secret: ${JWT_SECRET:unipath-development-secret-key-change-before-production-2026}
+    access-token-minutes: 30
+    refresh-token-days: 14
+    verification-token-hours: 24
+    refresh-cookie-name: UNIPATH_REFRESH_TOKEN
+    refresh-cookie-path: /api/v1/auth
+  frontend:
+    verification-success-url: ${FRONTEND_VERIFY_SUCCESS_URL:http://localhost:3000/auth/verify-success}
+    verification-failed-url: ${FRONTEND_VERIFY_FAILED_URL:http://localhost:3000/auth/verify-failed}
+  oauth:
+    google-client-id: ${GOOGLE_CLIENT_ID:}
+  mail:
+    enabled: ${MAIL_ENABLED:false}
+    from-email: ${MAIL_FROM_EMAIL:${MAIL_USERNAME:}}
+    from-name: ${MAIL_FROM_NAME:UniPath}

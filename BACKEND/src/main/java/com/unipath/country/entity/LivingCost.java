@@ -21,6 +21,5 @@ public class LivingCost {
     private BigDecimal maxAmountPerYear;
     private CurrencyCode currencyCode;
     private String sourceUrl;
-
-    private LocalDate lastCheckedAt;
+    private LocalDate lastUpdated;
 }

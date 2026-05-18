@@ -1,0 +1,15 @@
+export enum View {
+  Landing = 'landing',
+  Login = 'login',
+  Register = 'register',
+  Onboarding = 'onboarding',
+  Explore = 'explore',
+  Recommendations = 'recommendations',
+  Profile = 'profile',
+  TestScores = 'test-scores',
+  Budget = 'budget',
+  Preferences = 'preferences',
+  DocumentVault = 'document-vault',
+  Shortlist = 'shortlist',
+  ProgramDetail = 'program-detail',
+}

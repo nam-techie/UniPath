@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Login - UniPath</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@600;700&amp;family=Be+Vietnam+Pro:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed-variant": "#653e00",
+                        "on-tertiary": "#ffffff",
+                        "on-surface-variant": "#43474f",
+                        "on-secondary-container": "#00714d",
+                        "background": "#f8f9ff",
+                        "on-tertiary-container": "#d98b00",
+                        "secondary": "#006c49",
+                        "surface-container-highest": "#d3e4fe",
+                        "on-secondary-fixed-variant": "#005236",
+                        "primary-container": "#003366",
+                        "inverse-on-surface": "#eaf1ff",
+                        "tertiary": "#2e1a00",
+                        "surface": "#f8f9ff",
+                        "inverse-surface": "#213145",
+                        "on-primary-fixed": "#001b3c",
+                        "primary": "#001e40",
+                        "on-background": "#0b1c30",
+                        "surface-dim": "#cbdbf5",
+                        "primary-fixed": "#d5e3ff",
+                        "on-secondary-fixed": "#002113",
+                        "surface-container-lowest": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "surface-variant": "#d3e4fe",
+                        "surface-tint": "#3a5f94",
+                        "surface-container-high": "#dce9ff",
+                        "primary-fixed-dim": "#a7c8ff",
+                        "surface-bright": "#f8f9ff",
+                        "secondary-fixed": "#6ffbbe",
+                        "on-tertiary-fixed": "#2a1700",
+                        "tertiary-fixed": "#ffddb8",
+                        "surface-container": "#e5eeff",
+                        "secondary-fixed-dim": "#4edea3",
+                        "inverse-primary": "#a7c8ff",
+                        "outline-variant": "#c3c6d1",
+                        "secondary-container": "#6cf8bb",
+                        "on-error-container": "#93000a",
+                        "on-error": "#ffffff",
+                        "tertiary-container": "#4b2d00",
+                        "on-surface": "#0b1c30",
+                        "on-primary-container": "#799dd6",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed-variant": "#1f477b",
+                        "error": "#ba1a1a",
+                        "surface-container-low": "#eff4ff",
+                        "outline": "#737780",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb95f"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "margin-desktop": "40px",
+                        "base": "8px",
+                        "gutter": "24px",
+                        "container-max": "1280px"
+                    },
+                    "fontFamily": {
+                        "label-sm": ["Be Vietnam Pro"],
+                        "headline-lg-mobile": ["Public Sans"],
+                        "body-md": ["Be Vietnam Pro"],
+                        "body-lg": ["Be Vietnam Pro"],
+                        "headline-md": ["Public Sans"],
+                        "headline-lg": ["Public Sans"],
+                        "display-lg": ["Public Sans"],
+                        "label-md": ["Be Vietnam Pro"]
+                    },
+                    "fontSize": {
+                        "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "600"}],
+                        "headline-lg-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "fontWeight": "500"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #f8f9ff;
+            background-image: radial-gradient(at 0% 0%, hsla(215, 100%, 95%, 1) 0, transparent 50%), 
+                              radial-gradient(at 50% 0%, hsla(225, 100%, 98%, 1) 0, transparent 50%);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-body-md text-on-surface">
+<!-- Top Navigation (Shell Supressed for Transactional/Focused Login Task) -->
+<main class="flex-grow flex items-center justify-center px-margin-mobile py-12">
+<div class="w-full max-w-[440px]">
+<!-- Login Card -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl shadow-[0_4px_8px_rgba(0,0,0,0.04)] overflow-hidden">
+<div class="p-8 md:p-10 flex flex-col">
+<!-- Logo Header -->
+<div class="mb-10 text-center">
+<img alt="UniPath Logo" class="h-10 mx-auto mb-6 object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDJDsuuK4NvVER_6Hbcm83UUaROT9yDJl7E1s7jvYMClL9q6T9i9tJmyl0I9t9WKD6ACxyuFF567zlk9qVyKf5Ex2iAc565PbiTXDSaJBuYQrS0XNR9ZelvSjxEmjQCsCn6J8iQx_W8xtXvOo07uTzbwmEcwmjOX0O-qOmON9BfVrHTFK6E_8nEk-tH1oKeFakIY7L-NAvmnH6lYCVXIcN5BhwUfi_1DtxOaAAFqcuCHWUg0Ti9ZEoXdjDNq-k44oFT-Hk9B7DbKvJj"/>
+<h1 class="font-headline-md text-headline-md text-primary mb-2">Welcome Back</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Continue your global academic journey</p>
+</div>
+<!-- Login Form -->
+<form class="space-y-6">
+<!-- Email Field -->
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant" for="email">Email Address</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">mail</span>
+<input class="w-full pl-10 pr-4 py-3 bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary-fixed focus:border-primary outline-none transition-all font-body-md text-body-md placeholder:text-outline-variant" id="email" name="email" placeholder="student@example.com" type="email"/>
+</div>
+</div>
+<!-- Password Field -->
+<div class="space-y-2">
+<label class="font-label-md text-label-md text-on-surface-variant" for="password">Password</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">lock</span>
+<input class="w-full pl-10 pr-10 py-3 bg-surface border border-outline-variant rounded-lg focus:ring-2 focus:ring-primary-fixed focus:border-primary outline-none transition-all font-body-md text-body-md placeholder:text-outline-variant" id="password" name="password" placeholder="••••••••" type="password"/>
+<button class="absolute right-3 top-1/2 -translate-y-1/2 text-outline-variant hover:text-on-surface-variant transition-colors" type="button">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+</div>
+</div>
+<!-- Utilities -->
+<div class="flex items-center justify-between">
+<label class="flex items-center space-x-2 cursor-pointer group">
+<div class="relative flex items-center">
+<input class="peer h-5 w-5 rounded border-outline-variant text-primary focus:ring-primary-fixed-dim transition-all" type="checkbox"/>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant group-hover:text-primary transition-colors">Remember me</span>
+</label>
+<a class="font-label-md text-label-md text-primary hover:underline transition-all" href="#">Forgot password?</a>
+</div>
+<!-- CTA Button -->
+<button class="w-full bg-primary text-on-primary py-3.5 rounded-lg font-label-md text-label-md hover:bg-on-primary-fixed-variant transition-all active:scale-[0.98] shadow-sm" type="submit">
+                            Sign In
+                        </button>
+</form>
+<!-- Divider -->
+<div class="relative my-8">
+<div class="absolute inset-0 flex items-center">
+<span class="w-full border-t border-outline-variant"></span>
+</div>
+<div class="relative flex justify-center text-xs">
+<span class="bg-surface-container-lowest px-4 text-outline font-label-sm uppercase tracking-wider">or sign in with</span>
+</div>
+</div>
+<!-- Social Logins -->
+<div class="grid grid-cols-2 gap-4">
+<button class="flex items-center justify-center py-2.5 border border-outline-variant rounded-lg hover:bg-surface-container-low transition-colors group">
+<span class="material-symbols-outlined text-on-surface-variant mr-2 group-hover:text-primary">school</span>
+<span class="font-label-md text-label-md text-on-surface-variant">School ID</span>
+</button>
+<button class="flex items-center justify-center py-2.5 border border-outline-variant rounded-lg hover:bg-surface-container-low transition-colors group">
+<span class="material-symbols-outlined text-on-surface-variant mr-2 group-hover:text-primary">google</span>
+<span class="font-label-md text-label-md text-on-surface-variant">Google</span>
+</button>
+</div>
+</div>
+<!-- Footer Link -->
+<div class="bg-surface-container-low px-8 py-5 text-center border-t border-outline-variant">
+<p class="font-body-md text-label-md text-on-surface-variant">
+                        New to UniPath? 
+                        <a class="text-primary font-bold hover:underline ml-1" href="#">Create an account</a>
+</p>
+</div>
+</div>
+<!-- Supporting Text -->
+<div class="mt-8 text-center px-4">
+<p class="font-label-sm text-label-sm text-outline">
+                    By signing in, you agree to UniPath's 
+                    <a class="underline hover:text-on-surface-variant transition-colors" href="#">Terms of Service</a> and 
+                    <a class="underline hover:text-on-surface-variant transition-colors" href="#">Privacy Policy</a>.
+                </p>
+</div>
+</div>
+</main>
+<!-- Visual Backdrop Element -->
+<div class="fixed bottom-0 left-0 w-full h-1 bg-gradient-to-r from-primary via-secondary to-tertiary opacity-20"></div>
+<!-- Footer (Using Shell Component Mapping) -->
+<footer class="w-full py-8 px-margin-mobile md:px-margin-desktop flex flex-col md:flex-row justify-between items-center gap-4 border-t border-outline-variant bg-surface-container-low text-on-surface-variant">
+<div class="flex items-center space-x-2">
+<span class="text-label-md font-label-md font-bold text-primary">UniPath</span>
+<span class="text-body-md font-body-md text-outline">|</span>
+<p class="text-label-sm font-label-sm">© 2024 UniPath. Empowering Vietnamese Students Globally.</p>
+</div>
+<div class="flex gap-6">
+<a class="text-label-sm font-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="text-label-sm font-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Terms of Service</a>
+<a class="text-label-sm font-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Contact</a>
+</div>
+</footer>
+</body></html>
