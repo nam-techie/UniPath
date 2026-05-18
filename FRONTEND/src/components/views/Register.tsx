@@ -1,4 +1,7 @@
+import { FormEvent, useState } from 'react';
 import { BriefcaseBusiness, GraduationCap, ShieldCheck } from 'lucide-react';
+import { ApiError } from '../../services/apiClient';
+import { register } from '../../services/authService';
 import { View } from '../../types';
 
 const logoUrl =
@@ -9,6 +12,38 @@ interface RegisterProps {
 }
 
 export default function Register({ onViewChange }: RegisterProps) {
+  const [fullName, setFullName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setError('');
+    setSuccess('');
+
+    if (password !== confirmPassword) {
+      setError('Password and confirm password do not match.');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await register({ fullName, email, password, confirmPassword });
+      setSuccess(response.message);
+      setEmail(response.data.email);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Unable to create account. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-background text-on-surface">
       <header className="sticky top-0 z-50 w-full border-b border-outline-variant bg-surface">
@@ -19,7 +54,6 @@ export default function Register({ onViewChange }: RegisterProps) {
             type="button"
           >
             <img alt="UniPath Logo" className="h-10 object-contain" src={logoUrl} />
-            <span className="font-display text-2xl font-bold text-primary">UniPath</span>
           </button>
           <div className="hidden items-center gap-8 md:flex">
             <button className="text-sm font-medium text-on-surface-variant hover:text-primary" type="button">
@@ -88,7 +122,7 @@ export default function Register({ onViewChange }: RegisterProps) {
               </p>
             </div>
 
-            <form className="space-y-6">
+            <form className="space-y-6" onSubmit={handleSubmit}>
               <div className="space-y-2">
                 <label className="text-sm font-medium text-on-surface" htmlFor="register-name">
                   Full Name
@@ -97,9 +131,11 @@ export default function Register({ onViewChange }: RegisterProps) {
                   className="w-full rounded border border-outline bg-background px-4 py-3 text-base outline-none transition-all placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20"
                   id="register-name"
                   name="fullName"
+                  onChange={(event) => setFullName(event.target.value)}
                   placeholder="Le Van An"
                   required
                   type="text"
+                  value={fullName}
                 />
               </div>
 
@@ -111,9 +147,11 @@ export default function Register({ onViewChange }: RegisterProps) {
                   className="w-full rounded border border-outline bg-background px-4 py-3 text-base outline-none transition-all placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20"
                   id="register-email"
                   name="email"
+                  onChange={(event) => setEmail(event.target.value)}
                   placeholder="an.le@example.com"
                   required
                   type="email"
+                  value={email}
                 />
               </div>
 
@@ -126,9 +164,11 @@ export default function Register({ onViewChange }: RegisterProps) {
                     className="w-full rounded border border-outline bg-background px-4 py-3 text-base outline-none transition-all placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20"
                     id="register-password"
                     name="password"
+                    onChange={(event) => setPassword(event.target.value)}
                     placeholder="••••••••"
                     required
                     type="password"
+                    value={password}
                   />
                 </div>
                 <div className="space-y-2">
@@ -139,15 +179,23 @@ export default function Register({ onViewChange }: RegisterProps) {
                     className="w-full rounded border border-outline bg-background px-4 py-3 text-base outline-none transition-all placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20"
                     id="register-confirm-password"
                     name="confirmPassword"
+                    onChange={(event) => setConfirmPassword(event.target.value)}
                     placeholder="••••••••"
                     required
                     type="password"
+                    value={confirmPassword}
                   />
                 </div>
               </div>
 
               <label className="flex items-start gap-3">
-                <input className="mt-1 h-5 w-5 rounded border-outline accent-primary" required type="checkbox" />
+                <input
+                  checked={acceptedTerms}
+                  className="mt-1 h-5 w-5 rounded border-outline accent-primary"
+                  onChange={(event) => setAcceptedTerms(event.target.checked)}
+                  required
+                  type="checkbox"
+                />
                 <span className="text-sm leading-6 text-on-surface-variant">
                   I agree to the{' '}
                   <button className="font-semibold text-primary hover:underline" type="button">
@@ -161,11 +209,24 @@ export default function Register({ onViewChange }: RegisterProps) {
                 </span>
               </label>
 
+              {error && (
+                <div className="rounded border border-error/30 bg-error-container px-4 py-3 text-sm font-medium text-on-error-container">
+                  {error}
+                </div>
+              )}
+
+              {success && (
+                <div className="rounded border border-secondary/30 bg-secondary-container/40 px-4 py-3 text-sm font-medium text-on-secondary-container">
+                  {success}
+                </div>
+              )}
+
               <button
-                className="w-full rounded-full bg-primary py-4 text-base font-bold text-on-primary shadow-md transition-all hover:bg-primary-container active:scale-[0.98]"
+                className="w-full rounded-full bg-primary py-4 text-base font-bold text-on-primary shadow-md transition-all hover:bg-primary-container active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
+                disabled={loading}
                 type="submit"
               >
-                Create Account
+                {loading ? 'Creating account...' : 'Create Account'}
               </button>
             </form>
 

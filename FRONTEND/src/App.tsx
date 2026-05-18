@@ -14,11 +14,14 @@ import Recommendations from './components/views/Recommendations';
 import Register from './components/views/Register';
 import Shortlist from './components/views/Shortlist';
 import TestScores from './components/views/TestScores';
+import { getStoredUser } from './services/apiClient';
+import { logout, UserSummary } from './services/authService';
 import { View } from './types';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<View>(View.Landing);
   const [onboarded, setOnboarded] = useState(false);
+  const [currentUser, setCurrentUser] = useState<UserSummary | null>(() => getStoredUser<UserSummary>());
 
   const navigate = (view: View) => {
     setCurrentView(view);
@@ -36,6 +39,17 @@ export default function App() {
   const handleOnboardingComplete = () => {
     setOnboarded(true);
     navigate(View.Explore);
+  };
+
+  const handleLoginSuccess = (user: UserSummary) => {
+    setCurrentUser(user);
+    navigate(View.Explore);
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    setCurrentUser(null);
+    navigate(View.Landing);
   };
 
   // Views that use the left sidebar (Profile section)
@@ -58,7 +72,7 @@ export default function App() {
       case View.Landing:
         return <Landing onStart={handleStart} onRegister={() => navigate(View.Register)} />;
       case View.Login:
-        return <Login onViewChange={navigate} />;
+        return <Login onLoginSuccess={handleLoginSuccess} onViewChange={navigate} />;
       case View.Register:
         return <Register onViewChange={navigate} />;
       case View.Onboarding:
@@ -88,7 +102,14 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-background text-on-surface">
-      {!noNavbar && <Navbar currentView={currentView} onViewChange={navigate} />}
+      {!noNavbar && (
+        <Navbar
+          currentUser={currentUser}
+          currentView={currentView}
+          onLogout={handleLogout}
+          onViewChange={navigate}
+        />
+      )}
 
       <div className={`flex ${!noNavbar ? 'pt-16' : ''}`}>
         {hasSidebar && <Sidebar currentView={currentView} onViewChange={navigate} />}

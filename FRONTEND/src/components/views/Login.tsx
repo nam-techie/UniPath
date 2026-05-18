@@ -1,14 +1,38 @@
+import { FormEvent, useState } from 'react';
 import { Eye, GraduationCap, LockKeyhole, Mail } from 'lucide-react';
+import { ApiError } from '../../services/apiClient';
+import { login, UserSummary } from '../../services/authService';
 import { View } from '../../types';
 
 const logoUrl =
   'https://lh3.googleusercontent.com/aida-public/AB6AXuDJDsuuK4NvVER_6Hbcm83UUaROT9yDJl7E1s7jvYMClL9q6T9i9tJmyl0I9t9WKD6ACxyuFF567zlk9qVyKf5Ex2iAc565PbiTXDSaJBuYQrS0XNR9ZelvSjxEmjQCsCn6J8iQx_W8xtXvOo07uTzbwmEcwmjOX0O-qOmON9BfVrHTFK6E_8nEk-tH1oKeFakIY7L-NAvmnH6lYCVXIcN5BhwUfi_1DtxOaAAFqcuCHWUg0Ti9ZEoXdjDNq-k44oFT-Hk9B7DbKvJj';
 
 interface LoginProps {
+  onLoginSuccess: (user: UserSummary) => void;
   onViewChange: (view: View) => void;
 }
 
-export default function Login({ onViewChange }: LoginProps) {
+export default function Login({ onLoginSuccess, onViewChange }: LoginProps) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await login({ email, password });
+      onLoginSuccess(response.data.user);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Unable to sign in. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-background text-on-surface auth-soft-backdrop">
       <main className="flex-1 flex items-center justify-center px-4 py-12">
@@ -21,7 +45,7 @@ export default function Login({ onViewChange }: LoginProps) {
                 <p className="text-base text-on-surface-variant">Continue your global academic journey</p>
               </div>
 
-              <form className="space-y-6">
+              <form className="space-y-6" onSubmit={handleSubmit}>
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-on-surface" htmlFor="login-email">
                     Email Address
@@ -32,8 +56,11 @@ export default function Login({ onViewChange }: LoginProps) {
                       className="w-full rounded border border-outline-variant bg-background py-3 pl-11 pr-4 text-base outline-none transition-all placeholder:text-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/20"
                       id="login-email"
                       name="email"
+                      onChange={(event) => setEmail(event.target.value)}
                       placeholder="student@example.com"
+                      required
                       type="email"
+                      value={email}
                     />
                   </div>
                 </div>
@@ -48,8 +75,11 @@ export default function Login({ onViewChange }: LoginProps) {
                       className="w-full rounded border border-outline-variant bg-background py-3 pl-11 pr-11 text-base outline-none transition-all placeholder:text-outline-variant focus:border-primary focus:ring-2 focus:ring-primary/20"
                       id="login-password"
                       name="password"
+                      onChange={(event) => setPassword(event.target.value)}
                       placeholder="••••••••"
+                      required
                       type="password"
+                      value={password}
                     />
                     <button
                       aria-label="Show password"
@@ -74,11 +104,18 @@ export default function Login({ onViewChange }: LoginProps) {
                   </button>
                 </div>
 
+                {error && (
+                  <div className="rounded border border-error/30 bg-error-container px-4 py-3 text-sm font-medium text-on-error-container">
+                    {error}
+                  </div>
+                )}
+
                 <button
-                  className="w-full rounded bg-primary py-3.5 text-sm font-semibold text-on-primary shadow-sm transition-all hover:bg-primary-container active:scale-[0.98]"
+                  className="w-full rounded bg-primary py-3.5 text-sm font-semibold text-on-primary shadow-sm transition-all hover:bg-primary-container active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70"
+                  disabled={loading}
                   type="submit"
                 >
-                  Sign In
+                  {loading ? 'Signing in...' : 'Sign In'}
                 </button>
               </form>
 

@@ -1,12 +1,17 @@
 import { Bell, Search } from 'lucide-react';
+import { UserSummary } from '../../services/authService';
 import { View } from '../../types';
 
 interface NavbarProps {
+  currentUser: UserSummary | null;
   currentView: View;
+  onLogout: () => void | Promise<void>;
   onViewChange: (view: View) => void;
 }
 
-export default function Navbar({ currentView, onViewChange }: NavbarProps) {
+export default function Navbar({ currentUser, currentView, onLogout, onViewChange }: NavbarProps) {
+  const isAuthenticated = Boolean(currentUser);
+
   return (
     <header className="fixed top-0 left-0 w-full z-50 flex items-center h-16 bg-surface border-b border-outline-variant px-10">
       <div className="flex-1 flex items-center h-full">
@@ -28,7 +33,7 @@ export default function Navbar({ currentView, onViewChange }: NavbarProps) {
           { id: View.Explore, label: 'Explore Universities' },
           { id: View.Recommendations, label: 'Recommendations' },
           { id: View.Shortlist, label: 'Shortlist' },
-          { id: View.Profile, label: 'Profile' },
+          ...(isAuthenticated ? [{ id: View.Profile, label: 'Profile' }] : []),
         ].map((item) => {
           const profileViews = [View.Profile, View.TestScores, View.Budget, View.Preferences, View.DocumentVault];
           const isActive =
@@ -57,28 +62,38 @@ export default function Navbar({ currentView, onViewChange }: NavbarProps) {
         <button className="p-2 text-on-surface-variant hover:bg-surface-container rounded-full transition-colors">
           <Bell size={22} />
         </button>
-        <button
-          onClick={() => onViewChange(View.Login)}
-          className="ml-2 rounded px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-surface-container-low"
-        >
-          Sign in
-        </button>
-        <button
-          onClick={() => onViewChange(View.Register)}
-          className="rounded bg-primary px-4 py-2 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-container"
-        >
-          Register
-        </button>
-        <button
-          onClick={() => onViewChange(View.Profile)}
-          className="ml-2 w-9 h-9 rounded-full overflow-hidden border-2 border-outline-variant hover:border-primary transition-colors shadow-sm flex-shrink-0"
-        >
-          <img
-            alt="User Profile"
-            className="w-full h-full object-cover"
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuCHrtGDPYpJi_3fujxfzZsQVZ0lVZ1pPlEq88hf_5ilukR6saxHSE4tRxVSygl9RTf1PAWYx2qZ17wINnaJQTaHTzj6d8_1NM6DkK9q85RNnYiB2rZEKgKCGOnvNv9-w2Nl97j4YZAMQZoJlNYkVS59WjGwqsZatkXwSp1GFVJ_bmDguah0KPYhfWThounQ1d_kdo15u-sdEQgMnYJOE5QUXETjlOBMYblFnzTjovdsBTq_85lTLnzD9luE0JBzm0cjkWiNy0AMiOvy"
-          />
-        </button>
+        {isAuthenticated ? (
+          <>
+            <button
+              onClick={() => void onLogout()}
+              className="ml-2 rounded px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-surface-container-low"
+            >
+              Logout
+            </button>
+            <button
+              onClick={() => onViewChange(View.Profile)}
+              className="ml-2 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border-2 border-outline-variant bg-primary text-sm font-bold text-on-primary shadow-sm transition-colors hover:border-primary"
+              title={currentUser?.fullName}
+            >
+              {currentUser?.fullName?.charAt(0).toUpperCase() ?? 'U'}
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              onClick={() => onViewChange(View.Login)}
+              className="ml-2 rounded px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-surface-container-low"
+            >
+              Sign in
+            </button>
+            <button
+              onClick={() => onViewChange(View.Register)}
+              className="rounded bg-primary px-4 py-2 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-container"
+            >
+              Register
+            </button>
+          </>
+        )}
       </div>
     </header>
   );
