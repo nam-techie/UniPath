@@ -58,6 +58,18 @@ export default function Navbar({ currentView, onViewChange }: NavbarProps) {
           <Bell size={22} />
         </button>
         <button
+          onClick={() => onViewChange(View.Login)}
+          className="ml-2 rounded px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-surface-container-low"
+        >
+          Sign in
+        </button>
+        <button
+          onClick={() => onViewChange(View.Register)}
+          className="rounded bg-primary px-4 py-2 text-sm font-semibold text-on-primary transition-colors hover:bg-primary-container"
+        >
+          Register
+        </button>
+        <button
           onClick={() => onViewChange(View.Profile)}
           className="ml-2 w-9 h-9 rounded-full overflow-hidden border-2 border-outline-variant hover:border-primary transition-colors shadow-sm flex-shrink-0"
         >

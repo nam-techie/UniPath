@@ -5,11 +5,13 @@ import Budget from './components/views/Budget';
 import DocumentVault from './components/views/DocumentVault';
 import Explore from './components/views/Explore';
 import Landing from './components/views/Landing';
+import Login from './components/views/Login';
 import Onboarding from './components/views/Onboarding';
 import Preferences from './components/views/StudyPreferences';
 import Profile from './components/views/Profile';
 import ProgramDetail from './components/views/ProgramDetail';
 import Recommendations from './components/views/Recommendations';
+import Register from './components/views/Register';
 import Shortlist from './components/views/Shortlist';
 import TestScores from './components/views/TestScores';
 import { View } from './types';
@@ -46,15 +48,19 @@ export default function App() {
   ].includes(currentView);
 
   // Views that hide the top navbar
-  const noNavbar = [View.Onboarding].includes(currentView);
+  const noNavbar = [View.Onboarding, View.Login, View.Register].includes(currentView);
 
   // Views that render full-width (no extra padding wrapper)
-  const isFullWidth = [View.Landing].includes(currentView);
+  const isFullWidth = [View.Landing, View.Login, View.Register].includes(currentView);
 
   const renderView = () => {
     switch (currentView) {
       case View.Landing:
-        return <Landing onStart={handleStart} />;
+        return <Landing onStart={handleStart} onRegister={() => navigate(View.Register)} />;
+      case View.Login:
+        return <Login onViewChange={navigate} />;
+      case View.Register:
+        return <Register onViewChange={navigate} />;
       case View.Onboarding:
         return <Onboarding onComplete={handleOnboardingComplete} onCancel={() => navigate(View.Landing)} />;
       case View.Explore:
@@ -76,7 +82,7 @@ export default function App() {
       case View.ProgramDetail:
         return <ProgramDetail />;
       default:
-        return <Landing onStart={handleStart} />;
+        return <Landing onStart={handleStart} onRegister={() => navigate(View.Register)} />;
     }
   };
 

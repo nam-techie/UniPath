@@ -67,3 +67,9 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+.auth-soft-backdrop {
+  background-image:
+    radial-gradient(at 0% 0%, hsla(215, 100%, 95%, 1) 0, transparent 50%),
+    radial-gradient(at 50% 0%, hsla(225, 100%, 98%, 1) 0, transparent 50%);
+}

@@ -4,9 +4,10 @@ import { View } from '../../types';
 
 interface LandingProps {
   onStart: () => void;
+  onRegister?: () => void;
 }
 
-export default function Landing({ onStart }: LandingProps) {
+export default function Landing({ onStart, onRegister }: LandingProps) {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
@@ -119,7 +120,7 @@ export default function Landing({ onStart }: LandingProps) {
           </div>
           <div className="w-full md:w-auto relative z-10 flex-shrink-0">
             <button 
-              onClick={onStart}
+              onClick={onRegister ?? onStart}
               className="w-full sm:w-auto bg-on-primary text-primary-container px-8 py-4 rounded font-label-md text-label-md hover:bg-surface transition-colors shadow-md flex items-center justify-center gap-2"
             >
               Create Free Account
