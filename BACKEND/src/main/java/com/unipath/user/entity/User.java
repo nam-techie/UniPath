@@ -27,6 +27,8 @@ public class User {
     private AuthProvider authProvider;
     private String googleSubject;
     private Boolean emailVerified;
+    private Integer verificationResendCount;
+    private LocalDateTime verificationResendAvailableAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

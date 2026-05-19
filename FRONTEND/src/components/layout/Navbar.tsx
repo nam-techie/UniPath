@@ -1,4 +1,5 @@
-import { Bell, Search } from 'lucide-react';
+import { Bell, ChevronDown, LogOut, Search, UserRound } from 'lucide-react';
+import { useState } from 'react';
 import { UserSummary } from '../../services/authService';
 import { View } from '../../types';
 
@@ -11,6 +12,17 @@ interface NavbarProps {
 
 export default function Navbar({ currentUser, currentView, onLogout, onViewChange }: NavbarProps) {
   const isAuthenticated = Boolean(currentUser);
+  const [accountMenuOpen, setAccountMenuOpen] = useState(false);
+
+  const handleAccountNavigation = (view: View) => {
+    setAccountMenuOpen(false);
+    onViewChange(view);
+  };
+
+  const handleLogout = async () => {
+    setAccountMenuOpen(false);
+    await onLogout();
+  };
 
   return (
     <header className="fixed top-0 left-0 w-full z-50 flex items-center h-16 bg-surface border-b border-outline-variant px-10">
@@ -63,21 +75,56 @@ export default function Navbar({ currentUser, currentView, onLogout, onViewChang
           <Bell size={22} />
         </button>
         {isAuthenticated ? (
-          <>
+          <div className="relative ml-2">
             <button
-              onClick={() => void onLogout()}
-              className="ml-2 rounded px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-surface-container-low"
-            >
-              Logout
-            </button>
-            <button
-              onClick={() => onViewChange(View.Profile)}
-              className="ml-2 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border-2 border-outline-variant bg-primary text-sm font-bold text-on-primary shadow-sm transition-colors hover:border-primary"
+              aria-expanded={accountMenuOpen}
+              aria-haspopup="menu"
+              className="flex items-center gap-2 rounded-full border border-outline-variant bg-surface px-1.5 py-1 shadow-sm transition-colors hover:border-primary hover:bg-surface-container-low"
+              onClick={() => setAccountMenuOpen((open) => !open)}
               title={currentUser?.fullName}
+              type="button"
             >
-              {currentUser?.fullName?.charAt(0).toUpperCase() ?? 'U'}
+              <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-on-primary">
+                {currentUser?.fullName?.charAt(0).toUpperCase() ?? 'U'}
+              </span>
+              <ChevronDown
+                className={`hidden text-on-surface-variant transition-transform sm:block ${
+                  accountMenuOpen ? 'rotate-180' : ''
+                }`}
+                size={16}
+              />
             </button>
-          </>
+
+            {accountMenuOpen && (
+              <div
+                className="absolute right-0 top-12 z-50 w-64 overflow-hidden rounded-lg border border-outline-variant bg-surface shadow-[0_12px_30px_rgba(16,32,51,0.14)]"
+                role="menu"
+              >
+                <div className="border-b border-outline-variant/70 px-4 py-3">
+                  <p className="truncate text-sm font-bold text-primary">{currentUser?.fullName}</p>
+                  <p className="truncate text-xs font-medium text-on-surface-variant">{currentUser?.email}</p>
+                </div>
+                <button
+                  className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-semibold text-on-surface-variant transition-colors hover:bg-surface-container-low hover:text-primary"
+                  onClick={() => handleAccountNavigation(View.Profile)}
+                  role="menuitem"
+                  type="button"
+                >
+                  <UserRound size={18} />
+                  Account profile
+                </button>
+                <button
+                  className="flex w-full items-center gap-3 px-4 py-3 text-left text-sm font-semibold text-error transition-colors hover:bg-error-container/30"
+                  onClick={() => void handleLogout()}
+                  role="menuitem"
+                  type="button"
+                >
+                  <LogOut size={18} />
+                  Sign out
+                </button>
+              </div>
+            )}
+          </div>
         ) : (
           <>
             <button

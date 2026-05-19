@@ -31,9 +31,11 @@ app:
     access-token-minutes: 30
     refresh-token-days: 14
     verification-token-hours: 24
+    password-reset-token-minutes: 30
     refresh-cookie-name: UNIPATH_REFRESH_TOKEN
     refresh-cookie-path: /api/v1/auth
   frontend:
+    reset-password-url: ${FRONTEND_RESET_PASSWORD_URL:http://localhost:3000/?view=reset-password}
     verification-success-url: ${FRONTEND_VERIFY_SUCCESS_URL:http://localhost:3000/auth/verify-success}
     verification-failed-url: ${FRONTEND_VERIFY_FAILED_URL:http://localhost:3000/auth/verify-failed}
   oauth:

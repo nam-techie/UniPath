@@ -1,4 +1,4 @@
-import { CircleHelp, FileText, Globe, GraduationCap, LayoutDashboard, LogOut, Wallet } from 'lucide-react';
+import { CircleHelp, FileText, Globe, GraduationCap, LayoutDashboard, Wallet } from 'lucide-react';
 import { View } from '../../types';
 
 interface SidebarProps {
@@ -60,13 +60,6 @@ export default function Sidebar({ currentView, onViewChange }: SidebarProps) {
         <button className="w-full flex items-center gap-3 px-4 py-2 text-on-surface-variant hover:bg-surface-variant rounded-full hover:text-primary transition-all font-label-md text-label-md">
           <CircleHelp size={20} />
           Help Center
-        </button>
-        <button 
-          onClick={() => onViewChange(View.Landing)}
-          className="w-full flex items-center gap-3 px-4 py-2 text-error hover:bg-error-container/20 rounded-full transition-all font-label-md text-label-md"
-        >
-          <LogOut size={20} />
-          Logout
         </button>
       </div>
     </aside>

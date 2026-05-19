@@ -1,12 +1,13 @@
 package com.unipath.auth.service;
 
+import com.unipath.auth.dto.ResendVerificationResponse;
 import com.unipath.user.entity.User;
 
 public interface EmailVerificationService {
 
     void createAndSendVerification(User user);
 
-    void resendVerification(String email);
+    ResendVerificationResponse resendVerification(String email);
 
     void verifyEmail(String rawToken);
 }

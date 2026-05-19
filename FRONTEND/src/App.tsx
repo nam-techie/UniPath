@@ -4,6 +4,7 @@ import Sidebar from './components/layout/Sidebar';
 import Budget from './components/views/Budget';
 import DocumentVault from './components/views/DocumentVault';
 import Explore from './components/views/Explore';
+import ForgotPassword from './components/views/ForgotPassword';
 import Landing from './components/views/Landing';
 import Login from './components/views/Login';
 import Onboarding from './components/views/Onboarding';
@@ -12,6 +13,7 @@ import Profile from './components/views/Profile';
 import ProgramDetail from './components/views/ProgramDetail';
 import Recommendations from './components/views/Recommendations';
 import Register from './components/views/Register';
+import ResetPassword from './components/views/ResetPassword';
 import Shortlist from './components/views/Shortlist';
 import TestScores from './components/views/TestScores';
 import { getStoredUser } from './services/apiClient';
@@ -19,12 +21,22 @@ import { logout, UserSummary } from './services/authService';
 import { View } from './types';
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<View>(View.Landing);
+  const getInitialView = () => {
+    const params = new URLSearchParams(window.location.search);
+    const view = params.get('view');
+    return view === View.ResetPassword ? View.ResetPassword : View.Landing;
+  };
+
+  const [currentView, setCurrentView] = useState<View>(getInitialView);
+  const [resetToken, setResetToken] = useState(() => new URLSearchParams(window.location.search).get('token') ?? '');
   const [onboarded, setOnboarded] = useState(false);
   const [currentUser, setCurrentUser] = useState<UserSummary | null>(() => getStoredUser<UserSummary>());
 
   const navigate = (view: View) => {
     setCurrentView(view);
+    if (view !== View.ResetPassword) {
+      setResetToken('');
+    }
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
 
@@ -62,10 +74,22 @@ export default function App() {
   ].includes(currentView);
 
   // Views that hide the top navbar
-  const noNavbar = [View.Onboarding, View.Login, View.Register].includes(currentView);
+  const noNavbar = [
+    View.Onboarding,
+    View.Login,
+    View.Register,
+    View.ForgotPassword,
+    View.ResetPassword,
+  ].includes(currentView);
 
   // Views that render full-width (no extra padding wrapper)
-  const isFullWidth = [View.Landing, View.Login, View.Register].includes(currentView);
+  const isFullWidth = [
+    View.Landing,
+    View.Login,
+    View.Register,
+    View.ForgotPassword,
+    View.ResetPassword,
+  ].includes(currentView);
 
   const renderView = () => {
     switch (currentView) {
@@ -75,6 +99,10 @@ export default function App() {
         return <Login onLoginSuccess={handleLoginSuccess} onViewChange={navigate} />;
       case View.Register:
         return <Register onViewChange={navigate} />;
+      case View.ForgotPassword:
+        return <ForgotPassword onViewChange={navigate} />;
+      case View.ResetPassword:
+        return <ResetPassword token={resetToken} onViewChange={navigate} />;
       case View.Onboarding:
         return <Onboarding onComplete={handleOnboardingComplete} onCancel={() => navigate(View.Landing)} />;
       case View.Explore:

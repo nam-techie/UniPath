@@ -50,12 +50,40 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
+    @Override
+    public void sendPasswordReset(String toEmail, String fullName, String resetLink) {
+        if (!mailEnabled) {
+            System.out.println("[UniPath DEV] Password reset link for " + toEmail + ": " + resetLink);
+            return;
+        }
+
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, StandardCharsets.UTF_8.name());
+            helper.setFrom(fromEmail, fromName);
+            helper.setTo(toEmail);
+            helper.setSubject("Reset your UniPath password");
+            helper.setText(buildPasswordResetHtml(fullName, resetLink), true);
+            mailSender.send(message);
+        } catch (MessagingException | IOException exception) {
+            throw new BusinessException("Could not send password reset email.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     private String buildVerificationHtml(String fullName, String verificationLink) throws IOException {
         ClassPathResource resource = new ClassPathResource("templates/email-verification.html");
         String template = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
         return template
                 .replace("{{fullName}}", escapeHtml(fullName))
                 .replace("{{verificationLink}}", verificationLink);
+    }
+
+    private String buildPasswordResetHtml(String fullName, String resetLink) throws IOException {
+        ClassPathResource resource = new ClassPathResource("templates/password-reset.html");
+        String template = new String(resource.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
+        return template
+                .replace("{{fullName}}", escapeHtml(fullName))
+                .replace("{{resetLink}}", resetLink);
     }
 
     private String escapeHtml(String value) {

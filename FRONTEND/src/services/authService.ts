@@ -27,6 +27,27 @@ export interface RegisterPayload {
   confirmPassword: string;
 }
 
+export interface ResendVerificationPayload {
+  email: string;
+}
+
+export interface ForgotPasswordPayload {
+  email: string;
+}
+
+export interface ResetPasswordPayload {
+  token: string;
+  password: string;
+  confirmPassword: string;
+}
+
+export interface ResendVerificationResponse {
+  attemptsUsed: number;
+  maxAttempts: number;
+  retryAfterSeconds: number;
+  locked: boolean;
+}
+
 export interface AuthResponse {
   accessToken: string;
   user: UserSummary;
@@ -52,6 +73,34 @@ export const login = async (payload: LoginPayload) => {
 
 export const register = (payload: RegisterPayload) =>
   apiRequest<RegisterResponse>('/auth/register', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+    auth: false,
+  });
+
+export const resendVerification = (payload: ResendVerificationPayload) =>
+  apiRequest<ResendVerificationResponse>('/auth/resend-verification', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+    auth: false,
+  });
+
+export const forgotPassword = (payload: ForgotPasswordPayload) =>
+  apiRequest<void>('/auth/forgot-password', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+    auth: false,
+  });
+
+export const validatePasswordResetToken = (token: string) =>
+  apiRequest<void>('/auth/reset-password/validate', {
+    method: 'POST',
+    body: JSON.stringify({ token }),
+    auth: false,
+  });
+
+export const resetPassword = (payload: ResetPasswordPayload) =>
+  apiRequest<void>('/auth/reset-password', {
     method: 'POST',
     body: JSON.stringify(payload),
     auth: false,

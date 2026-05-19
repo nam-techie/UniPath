@@ -2,6 +2,8 @@ export enum View {
   Landing = 'landing',
   Login = 'login',
   Register = 'register',
+  ForgotPassword = 'forgot-password',
+  ResetPassword = 'reset-password',
   Onboarding = 'onboarding',
   Explore = 'explore',
   Recommendations = 'recommendations',

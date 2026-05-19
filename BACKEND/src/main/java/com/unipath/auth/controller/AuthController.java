@@ -1,14 +1,19 @@
 package com.unipath.auth.controller;
 
 import com.unipath.auth.dto.AuthResponse;
+import com.unipath.auth.dto.ForgotPasswordRequest;
 import com.unipath.auth.dto.GoogleLoginRequest;
 import com.unipath.auth.dto.LoginRequest;
 import com.unipath.auth.dto.RegisterRequest;
 import com.unipath.auth.dto.RegisterResponse;
 import com.unipath.auth.dto.ResendVerificationRequest;
+import com.unipath.auth.dto.ResendVerificationResponse;
+import com.unipath.auth.dto.ResetPasswordRequest;
 import com.unipath.auth.dto.UserSummaryResponse;
+import com.unipath.auth.dto.ValidatePasswordResetTokenRequest;
 import com.unipath.auth.service.AuthService;
 import com.unipath.auth.service.EmailVerificationService;
+import com.unipath.auth.service.PasswordResetService;
 import com.unipath.common.response.ApiResponse;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -29,6 +34,7 @@ public class AuthController {
 
     private final AuthService authService;
     private final EmailVerificationService emailVerificationService;
+    private final PasswordResetService passwordResetService;
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<RegisterResponse>> register(@Valid @RequestBody RegisterRequest request) {
@@ -37,17 +43,37 @@ public class AuthController {
     }
 
     @PostMapping("/resend-verification")
-    public ResponseEntity<ApiResponse<Void>> resendVerification(
+    public ResponseEntity<ApiResponse<ResendVerificationResponse>> resendVerification(
             @Valid @RequestBody ResendVerificationRequest request
     ) {
-        emailVerificationService.resendVerification(request.email());
-        return ResponseEntity.ok(ApiResponse.success("If the account needs verification, a new email has been sent.", null));
+        ResendVerificationResponse response = emailVerificationService.resendVerification(request.email());
+        return ResponseEntity.ok(ApiResponse.success("Verification email request accepted.", response));
     }
 
     @GetMapping("/verify-email")
     public ResponseEntity<ApiResponse<Void>> verifyEmail(@RequestParam String token) {
         emailVerificationService.verifyEmail(token);
         return ResponseEntity.ok(ApiResponse.success("Email verified successfully.", null));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<ApiResponse<Void>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        passwordResetService.requestPasswordReset(request.email());
+        return ResponseEntity.ok(ApiResponse.success("If the account exists, a password reset link has been sent.", null));
+    }
+
+    @PostMapping("/reset-password/validate")
+    public ResponseEntity<ApiResponse<Void>> validatePasswordResetToken(
+            @Valid @RequestBody ValidatePasswordResetTokenRequest request
+    ) {
+        passwordResetService.validateResetToken(request.token());
+        return ResponseEntity.ok(ApiResponse.success("Password reset link is valid.", null));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse<Void>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        passwordResetService.resetPassword(request);
+        return ResponseEntity.ok(ApiResponse.success("Password has been reset successfully.", null));
     }
 
     @PostMapping("/login")

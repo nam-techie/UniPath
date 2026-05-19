@@ -1,5 +1,6 @@
 package com.unipath.auth.service.impl;
 
+import com.unipath.auth.dto.ResendVerificationResponse;
 import com.unipath.auth.entity.EmailVerificationToken;
 import com.unipath.auth.repository.EmailVerificationTokenRepository;
 import com.unipath.auth.service.EmailVerificationService;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.security.SecureRandom;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Base64;
 
@@ -27,6 +29,14 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
     private final UserRepository userRepository;
     private final EmailService emailService;
     private final SecureRandom secureRandom = new SecureRandom();
+    private static final int MAX_RESEND_ATTEMPTS = 5;
+    private static final Duration[] RESEND_COOLDOWNS = {
+            Duration.ofMinutes(1),
+            Duration.ofMinutes(5),
+            Duration.ofMinutes(30),
+            Duration.ofHours(2),
+            Duration.ofHours(24)
+    };
 
     @Value("${app.backend.base-url}")
     private String backendBaseUrl;
@@ -56,11 +66,12 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
     }
 
     @Override
-    public void resendVerification(String email) {
-        userRepository.findByEmail(email.trim().toLowerCase())
+    public ResendVerificationResponse resendVerification(String email) {
+        return userRepository.findByEmail(email.trim().toLowerCase())
                 .filter(user -> !Boolean.TRUE.equals(user.getEmailVerified()))
                 .filter(user -> user.getStatus() == UserStatus.PENDING_VERIFICATION)
-                .ifPresent(this::createAndSendVerification);
+                .map(this::resendForPendingUser)
+                .orElseGet(() -> new ResendVerificationResponse(0, MAX_RESEND_ATTEMPTS, 0, false));
     }
 
     @Override
@@ -77,6 +88,10 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
         }
 
         User user = token.getUser();
+        if (user.getStatus() == UserStatus.DISABLED) {
+            throw new BusinessException("This account is disabled.", HttpStatus.FORBIDDEN);
+        }
+
         user.setEmailVerified(true);
         user.setStatus(UserStatus.ACTIVE);
         user.setUpdatedAt(LocalDateTime.now());
@@ -94,6 +109,70 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
             token.setUsedAt(now);
             emailVerificationTokenRepository.save(token);
         });
+    }
+
+    private ResendVerificationResponse resendForPendingUser(User user) {
+        LocalDateTime now = LocalDateTime.now();
+        int attemptsUsed = getAttemptsUsed(user);
+        LocalDateTime availableAt = user.getVerificationResendAvailableAt();
+
+        if (availableAt != null && now.isBefore(availableAt)) {
+            long retryAfterSeconds = Math.max(1, Duration.between(now, availableAt).toSeconds());
+            throw new BusinessException(
+                    "Please wait " + formatDuration(retryAfterSeconds) + " before requesting another verification email.",
+                    HttpStatus.TOO_MANY_REQUESTS
+            );
+        }
+
+        if (attemptsUsed >= MAX_RESEND_ATTEMPTS - 1) {
+            user.setStatus(UserStatus.DISABLED);
+            user.setUpdatedAt(now);
+            userRepository.save(user);
+            throw new BusinessException(
+                    "This account has been locked after too many verification email requests.",
+                    HttpStatus.FORBIDDEN
+            );
+        }
+
+        createAndSendVerification(user);
+
+        int updatedAttempts = attemptsUsed + 1;
+        long retryAfterSeconds = cooldownAfterAttempt(updatedAttempts).toSeconds();
+        user.setVerificationResendCount(updatedAttempts);
+        user.setVerificationResendAvailableAt(now.plusSeconds(retryAfterSeconds));
+        user.setUpdatedAt(now);
+        userRepository.save(user);
+
+        return new ResendVerificationResponse(
+                updatedAttempts,
+                MAX_RESEND_ATTEMPTS,
+                retryAfterSeconds,
+                false
+        );
+    }
+
+    private int getAttemptsUsed(User user) {
+        return user.getVerificationResendCount() == null ? 0 : user.getVerificationResendCount();
+    }
+
+    private Duration cooldownAfterAttempt(int attemptsUsed) {
+        int index = Math.min(attemptsUsed, RESEND_COOLDOWNS.length - 1);
+        return RESEND_COOLDOWNS[index];
+    }
+
+    private String formatDuration(long totalSeconds) {
+        long minutes = totalSeconds / 60;
+        long seconds = totalSeconds % 60;
+
+        if (minutes > 0 && seconds > 0) {
+            return minutes + "m " + seconds + "s";
+        }
+
+        if (minutes > 0) {
+            return minutes + "m";
+        }
+
+        return seconds + "s";
     }
 
     private String generateRawToken() {

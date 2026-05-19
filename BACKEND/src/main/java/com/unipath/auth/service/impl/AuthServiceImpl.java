@@ -68,6 +68,8 @@ public class AuthServiceImpl implements AuthService {
         user.setStatus(UserStatus.PENDING_VERIFICATION);
         user.setAuthProvider(AuthProvider.EMAIL_PASSWORD);
         user.setEmailVerified(false);
+        user.setVerificationResendCount(0);
+        user.setVerificationResendAvailableAt(LocalDateTime.now().plusMinutes(1));
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
         userRepository.save(user);
