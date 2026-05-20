@@ -9,5 +9,5 @@ public interface EmailVerificationService {
 
     ResendVerificationResponse resendVerification(String email);
 
-    void verifyEmail(String rawToken);
+    com.unipath.user.entity.User verifyEmail(String rawToken);
 }

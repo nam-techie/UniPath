@@ -6,6 +6,7 @@ import com.unipath.auth.dto.LoginRequest;
 import com.unipath.auth.dto.RegisterRequest;
 import com.unipath.auth.dto.RegisterResponse;
 import com.unipath.auth.dto.UserSummaryResponse;
+
 import jakarta.servlet.http.HttpServletResponse;
 
 public interface AuthService {
@@ -15,6 +16,8 @@ public interface AuthService {
     AuthResponse login(LoginRequest request, HttpServletResponse response);
 
     AuthResponse loginWithGoogle(GoogleLoginRequest request, HttpServletResponse response);
+
+    AuthResponse loginUser(com.unipath.user.entity.User user, HttpServletResponse response);
 
     AuthResponse refresh(String rawRefreshToken);
 

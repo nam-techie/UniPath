@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from './components/layout/Navbar';
 import Sidebar from './components/layout/Sidebar';
 import Budget from './components/views/Budget';
@@ -17,7 +17,7 @@ import ResetPassword from './components/views/ResetPassword';
 import Shortlist from './components/views/Shortlist';
 import TestScores from './components/views/TestScores';
 import { getStoredUser } from './services/apiClient';
-import { logout, UserSummary } from './services/authService';
+import { logout, UserSummary, refresh } from './services/authService';
 import { View } from './types';
 
 export default function App() {
@@ -63,6 +63,27 @@ export default function App() {
     setCurrentUser(null);
     navigate(View.Landing);
   };
+
+  useEffect(() => {
+    const path = window.location.pathname;
+    if (path === '/auth/verify-success') {
+      (async () => {
+        try {
+          const res = await refresh();
+          setCurrentUser(res.data.user);
+          navigate(View.Explore);
+        } catch (e) {
+          navigate(View.Landing);
+        } finally {
+          window.history.replaceState({}, document.title, '/');
+        }
+      })();
+    } else if (path === '/auth/verify-failed') {
+      window.history.replaceState({}, document.title, '/');
+      navigate(View.Landing);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Views that use the left sidebar (Profile section)
   const hasSidebar = [

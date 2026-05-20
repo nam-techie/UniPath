@@ -1,5 +1,15 @@
 package com.unipath.auth.service.impl;
 
+import java.security.SecureRandom;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.Base64;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.util.UriComponentsBuilder;
+
 import com.unipath.auth.dto.ResendVerificationResponse;
 import com.unipath.auth.entity.EmailVerificationToken;
 import com.unipath.auth.repository.EmailVerificationTokenRepository;
@@ -10,16 +20,8 @@ import com.unipath.common.util.TokenHashUtil;
 import com.unipath.notification.service.EmailService;
 import com.unipath.user.entity.User;
 import com.unipath.user.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import java.security.SecureRandom;
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.util.Base64;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -75,7 +77,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
     }
 
     @Override
-    public void verifyEmail(String rawToken) {
+    public User verifyEmail(String rawToken) {
         EmailVerificationToken token = emailVerificationTokenRepository.findByTokenHash(TokenHashUtil.sha256(rawToken))
                 .orElseThrow(() -> new BusinessException("Verification token is invalid.", HttpStatus.BAD_REQUEST));
 
@@ -100,6 +102,8 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
         token.setUsed(true);
         token.setUsedAt(LocalDateTime.now());
         emailVerificationTokenRepository.save(token);
+
+        return user;
     }
 
     private void revokeUnusedTokens(User user) {
@@ -152,7 +156,8 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
     }
 
     private int getAttemptsUsed(User user) {
-        return user.getVerificationResendCount() == null ? 0 : user.getVerificationResendCount();
+        Integer count = user.getVerificationResendCount();
+        return count == null ? 0 : count;
     }
 
     private Duration cooldownAfterAttempt(int attemptsUsed) {

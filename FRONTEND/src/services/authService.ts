@@ -71,6 +71,18 @@ export const login = async (payload: LoginPayload) => {
   return response;
 };
 
+export const refresh = async () => {
+  const response = await apiRequest<AuthResponse>('/auth/refresh', {
+    method: 'POST',
+    auth: false,
+  });
+
+  setAccessToken(response.data.accessToken);
+  setStoredUser(response.data.user);
+
+  return response;
+};
+
 export const register = (payload: RegisterPayload) =>
   apiRequest<RegisterResponse>('/auth/register', {
     method: 'POST',

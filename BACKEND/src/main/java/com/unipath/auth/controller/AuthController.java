@@ -1,5 +1,15 @@
 package com.unipath.auth.controller;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.unipath.auth.dto.AuthResponse;
 import com.unipath.auth.dto.ForgotPasswordRequest;
 import com.unipath.auth.dto.GoogleLoginRequest;
@@ -15,17 +25,10 @@ import com.unipath.auth.service.AuthService;
 import com.unipath.auth.service.EmailVerificationService;
 import com.unipath.auth.service.PasswordResetService;
 import com.unipath.common.response.ApiResponse;
+
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -35,6 +38,12 @@ public class AuthController {
     private final AuthService authService;
     private final EmailVerificationService emailVerificationService;
     private final PasswordResetService passwordResetService;
+
+    @Value("${app.frontend.verification-success-url}")
+    private String verificationSuccessUrl;
+
+    @Value("${app.frontend.verification-failed-url}")
+    private String verificationFailedUrl;
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse<RegisterResponse>> register(@Valid @RequestBody RegisterRequest request) {
@@ -51,9 +60,27 @@ public class AuthController {
     }
 
     @GetMapping("/verify-email")
-    public ResponseEntity<ApiResponse<Void>> verifyEmail(@RequestParam String token) {
-        emailVerificationService.verifyEmail(token);
-        return ResponseEntity.ok(ApiResponse.success("Email verified successfully.", null));
+    public void verifyEmail(@RequestParam String token, HttpServletResponse servletResponse) {
+        try {
+            com.unipath.user.entity.User user = emailVerificationService.verifyEmail(token);
+            try {
+                // create session (refresh cookie + access token issued server-side)
+                authService.loginUser(user, servletResponse);
+                servletResponse.sendRedirect(verificationSuccessUrl);
+            } catch (Exception e) {
+                try {
+                    servletResponse.sendRedirect(verificationSuccessUrl);
+                } catch (Exception ex) {
+                    // swallow
+                }
+            }
+        } catch (Exception ex) {
+            try {
+                servletResponse.sendRedirect(verificationFailedUrl);
+            } catch (Exception e) {
+                // swallow
+            }
+        }
     }
 
     @PostMapping("/forgot-password")

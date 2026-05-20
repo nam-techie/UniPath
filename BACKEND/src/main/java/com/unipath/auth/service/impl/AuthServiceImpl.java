@@ -1,7 +1,15 @@
 package com.unipath.auth.service.impl;
 
+import java.time.LocalDateTime;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.unipath.auth.dto.AuthResponse;
-import com.unipath.auth.dto.EmailVerificationRequiredResponse;
 import com.unipath.auth.dto.GoogleLoginRequest;
 import com.unipath.auth.dto.GoogleTokenPayload;
 import com.unipath.auth.dto.LoginRequest;
@@ -20,16 +28,9 @@ import com.unipath.security.jwt.JwtService;
 import com.unipath.security.principal.UserPrincipal;
 import com.unipath.user.entity.User;
 import com.unipath.user.repository.UserRepository;
+
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -141,6 +142,12 @@ public class AuthServiceImpl implements AuthService {
         User user = refreshTokenService.validateRefreshToken(rawRefreshToken);
         ensureCanLogin(user);
         return new AuthResponse(jwtService.generateAccessToken(user), toUserSummary(user));
+    }
+
+    @Override
+    public AuthResponse loginUser(com.unipath.user.entity.User user, HttpServletResponse response) {
+        ensureCanLogin(user);
+        return issueAuthResponse(user, response);
     }
 
     @Override

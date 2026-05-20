@@ -1,5 +1,5 @@
 import { FormEvent, useState } from 'react';
-import { BriefcaseBusiness, GraduationCap, ShieldCheck } from 'lucide-react';
+import { BriefcaseBusiness, GraduationCap, ShieldCheck, Eye, EyeOff } from 'lucide-react';
 import { ApiError } from '../../services/apiClient';
 import { register } from '../../services/authService';
 import { View } from '../../types';
@@ -20,6 +20,8 @@ export default function Register({ onViewChange }: RegisterProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -38,7 +40,20 @@ export default function Register({ onViewChange }: RegisterProps) {
       setSuccess(response.message);
       setEmail(response.data.email);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Unable to create account. Please try again.');
+      if (err instanceof ApiError) {
+        // backend returns field errors in payload.data for validation failures
+        const payload: any = err.data;
+        if (payload?.data && Array.isArray(payload.data) && payload.data.length > 0) {
+          const pwdErr = payload.data.find((e: any) => e.field === 'password')?.message;
+          const confirmErr = payload.data.find((e: any) => e.field === 'confirmPassword')?.message;
+          const fullMsg = pwdErr || confirmErr || payload.data.map((e: any) => e.message).join(' ');
+          setError(fullMsg || err.message);
+        } else {
+          setError(err.message || 'Unable to create account. Please try again.');
+        }
+      } else {
+        setError('Unable to create account. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -138,31 +153,51 @@ export default function Register({ onViewChange }: RegisterProps) {
                   <label className="auth-label text-sm font-medium text-on-surface" htmlFor="register-password">
                     Password
                   </label>
-                  <input
-                    className="auth-input w-full rounded border border-outline bg-background px-4 py-2.5 text-base outline-none transition-all placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20"
-                    id="register-password"
-                    name="password"
-                    onChange={(event) => setPassword(event.target.value)}
-                    placeholder="********"
-                    required
-                    type="password"
-                    value={password}
-                  />
+                    <div className="relative">
+                      <input
+                        className="auth-input w-full rounded border border-outline bg-background px-4 py-2.5 pr-10 text-base outline-none transition-all placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20"
+                        id="register-password"
+                        name="password"
+                        onChange={(event) => setPassword(event.target.value)}
+                        placeholder="********"
+                        required
+                        type={showPassword ? 'text' : 'password'}
+                        value={password}
+                      />
+                      <button
+                        type="button"
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                        onClick={() => setShowPassword((s) => !s)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 text-on-surface/70"
+                      >
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </button>
+                    </div>
                 </div>
                 <div className="space-y-1.5">
                   <label className="auth-label text-sm font-medium text-on-surface" htmlFor="register-confirm-password">
                     Confirm Password
                   </label>
-                  <input
-                    className="auth-input w-full rounded border border-outline bg-background px-4 py-2.5 text-base outline-none transition-all placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20"
-                    id="register-confirm-password"
-                    name="confirmPassword"
-                    onChange={(event) => setConfirmPassword(event.target.value)}
-                    placeholder="********"
-                    required
-                    type="password"
-                    value={confirmPassword}
-                  />
+                  <div className="relative">
+                    <input
+                      className="auth-input w-full rounded border border-outline bg-background px-4 py-2.5 pr-10 text-base outline-none transition-all placeholder:text-outline focus:border-primary focus:ring-2 focus:ring-primary/20"
+                      id="register-confirm-password"
+                      name="confirmPassword"
+                      onChange={(event) => setConfirmPassword(event.target.value)}
+                      placeholder="********"
+                      required
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      value={confirmPassword}
+                    />
+                    <button
+                      type="button"
+                      aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
+                      onClick={() => setShowConfirmPassword((s) => !s)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-on-surface/70"
+                    >
+                      {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
                 </div>
               </div>
 

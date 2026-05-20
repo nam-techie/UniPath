@@ -2,7 +2,7 @@
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
     <data-source source="LOCAL" name="unipath" uuid="c092e8d7-8c2e-4a15-9ea6-39f77bdf6425">
-      <driver-ref>mongo.4</driver-ref>
+      <driver-ref>mongo</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>com.dbschema.MongoJdbcDriver</jdbc-driver>
       <jdbc-url>mongodb+srv://unipath.bttwvph.mongodb.net/</jdbc-url>
