@@ -1,14 +1,37 @@
-import { ChevronLeft, ChevronRight, Heart, Languages, Star, ArrowUpDown } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Heart, Languages, Star, ArrowUpDown, Building2, Globe } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { University } from '../../types/university';
+import { universityService } from '../../services/universityService';
 
 interface ExploreProps {
   onProgramClick: () => void;
 }
 
 export default function Explore({ onProgramClick }: ExploreProps) {
-  const [activeTab, setActiveTab] = useState<'programmes' | 'universities' | 'scholarships'>('programmes');
+  const [activeTab, setActiveTab] = useState<'programmes' | 'universities' | 'scholarships'>('universities');
   const [activeDegree, setActiveDegree] = useState<string>('Undergraduate');
+  const [universities, setUniversities] = useState<University[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (activeTab === 'universities') {
+      const fetchUniversities = async () => {
+        try {
+          setLoading(true);
+          const response = await universityService.getAllUniversities();
+          if (response.success) {
+            setUniversities(response.data);
+          }
+        } catch (error) {
+          console.error("Failed to fetch universities:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchUniversities();
+    }
+  }, [activeTab]);
 
   const programs = [
     {
@@ -123,7 +146,9 @@ export default function Explore({ onProgramClick }: ExploreProps) {
       {/* Results List */}
       <section className="flex-grow">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-on-surface">633 Bachelor's degrees in Computer Science &amp; IT in Australia</h1>
+          <h1 className="text-2xl font-bold text-on-surface">
+            {activeTab === 'universities' ? `Explore ${universities.length > 0 ? universities.length : ''} Universities in Vietnam` : "633 Bachelor's degrees in Computer Science & IT in Australia"}
+          </h1>
           {/* Tab bar — matching Figma */}
           <div className="flex items-center gap-6 mt-4 border-b border-outline-variant overflow-x-auto no-scrollbar">
             {tabs.map(tab => (
@@ -153,7 +178,67 @@ export default function Explore({ onProgramClick }: ExploreProps) {
         </div>
 
         <div className="flex flex-col gap-4 mt-6">
-          {programs.map((program, idx) => (
+          {activeTab === 'universities' ? (
+            loading ? (
+              <div className="flex justify-center p-8 text-on-surface-variant font-medium">Đang tải danh sách trường đại học...</div>
+            ) : universities.length > 0 ? (
+              universities.map((uni, idx) => (
+                <motion.article 
+                  key={uni.id || idx}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.1 }}
+                  className="bg-surface rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow relative p-4"
+                >
+                  <button className="absolute top-4 right-4 text-on-surface-variant hover:text-error transition-colors">
+                    <Heart size={20} />
+                  </button>
+                  <div className="flex gap-4">
+                    <div className="w-14 h-14 bg-background rounded-lg border border-outline-variant flex items-center justify-center flex-shrink-0 p-1">
+                      {uni.logoUrl ? (
+                        <img alt={`${uni.name} Logo`} className="w-full h-full object-contain" src={uni.logoUrl} />
+                      ) : (
+                        <Building2 size={24} className="text-outline" />
+                      )}
+                    </div>
+                    <div className="flex-grow">
+                      <div className="flex items-center gap-2 flex-wrap mb-1">
+                        <span className="text-sm text-on-surface font-semibold">{uni.code !== 'UNKNOWN' ? uni.code : 'ĐH'}</span>
+                        <div className="flex items-center gap-0.5 text-on-surface text-[11px]">
+                           <span className="bg-primary/10 text-primary px-1.5 py-0.5 rounded text-[10px] font-bold">{uni.institutionType || 'Đại học'}</span>
+                        </div>
+                      </div>
+                      <h2 
+                        className="text-lg font-bold text-on-surface mt-1 hover:text-primary cursor-pointer transition-colors"
+                      >
+                        {uni.name}
+                      </h2>
+                      
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mt-4 gap-4">
+                        <div className="flex items-center gap-2 text-xs text-on-surface-variant">
+                          {uni.websiteUrl && (
+                            <a href={uni.websiteUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 hover:text-primary transition-colors">
+                              <Globe size={14} /> Website chính thức
+                            </a>
+                          )}
+                        </div>
+                        <div className="text-right leading-tight w-full sm:w-auto">
+                          <button 
+                            className="text-primary text-xs font-bold hover:underline"
+                          >
+                            Xem thông tin tuyển sinh
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.article>
+              ))
+            ) : (
+              <div className="flex justify-center p-8 text-on-surface-variant font-medium">Chưa có dữ liệu trường đại học.</div>
+            )
+          ) : (
+            programs.map((program, idx) => (
             <motion.article 
               key={program.id}
               initial={{ opacity: 0, y: 10 }}
@@ -211,7 +296,8 @@ export default function Explore({ onProgramClick }: ExploreProps) {
                 </div>
               </div>
             </motion.article>
-          ))}
+            ))
+          )}
         </div>
 
         {/* Pagination */}
