@@ -38,6 +38,7 @@ public class SecurityConfig {
                                 "/swagger-resources/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.POST,
+                                "/api/v1/admin/crawler/upload",
                                 "/api/v1/auth/register",
                                 "/api/v1/auth/login",
                                 "/api/v1/auth/google",
@@ -48,7 +49,10 @@ public class SecurityConfig {
                                 "/api/v1/auth/refresh",
                                 "/api/v1/auth/logout"
                         ).permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/auth/verify-email").permitAll()
+                        .requestMatchers(HttpMethod.GET, 
+                                "/api/v1/auth/verify-email",
+                                "/api/v1/universities/**"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
