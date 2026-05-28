@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Heart, Languages, Star, ArrowUpDown, Building2, Globe } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Heart, Languages, Star, ArrowUpDown, Building2, Globe } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useState, useEffect } from 'react';
 import { University } from '../../types/university';
@@ -18,6 +18,28 @@ export default function Explore({ onProgramClick }: ExploreProps) {
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+
+  const getPaginationItems = () => {
+    const items: (number | string)[] = [];
+    if (totalPages <= 7) {
+      for (let i = 0; i < totalPages; i++) items.push(i);
+    } else {
+      items.push(0);
+      if (currentPage > 2) items.push('...');
+      
+      let start = Math.max(1, currentPage - 1);
+      let end = Math.min(totalPages - 2, currentPage + 1);
+      
+      if (currentPage <= 2) end = 3;
+      if (currentPage >= totalPages - 3) start = totalPages - 4;
+      
+      for (let i = start; i <= end; i++) items.push(i);
+      
+      if (currentPage < totalPages - 3) items.push('...');
+      items.push(totalPages - 1);
+    }
+    return items;
+  };
 
   const handleTabChange = (tab: 'programmes' | 'universities' | 'scholarships') => {
     setActiveTab(tab);
@@ -314,33 +336,55 @@ export default function Explore({ onProgramClick }: ExploreProps) {
         {totalPages > 0 && (
           <div className="mt-12 flex justify-center items-center gap-2">
             <button 
+              onClick={() => setCurrentPage(0)}
+              disabled={currentPage === 0}
+              className="w-10 h-10 flex items-center justify-center rounded-full border border-outline-variant text-on-surface-variant hover:bg-surface-container transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              title="First Page"
+            >
+              <ChevronsLeft size={20} />
+            </button>
+            <button 
               onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
               disabled={currentPage === 0}
               className="w-10 h-10 flex items-center justify-center rounded-full border border-outline-variant text-on-surface-variant hover:bg-surface-container transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              title="Previous Page"
             >
               <ChevronLeft size={20} />
             </button>
             
-            {Array.from({ length: totalPages }, (_, i) => (
-              <button 
-                key={i}
-                onClick={() => setCurrentPage(i)}
-                className={`w-10 h-10 flex items-center justify-center rounded-full text-sm font-bold transition-colors shadow-sm ${
-                  currentPage === i 
-                    ? 'bg-primary text-on-primary' 
-                    : 'text-on-surface-variant hover:bg-surface-container border border-transparent'
-                }`}
-              >
-                {i + 1}
-              </button>
+            {getPaginationItems().map((item, index) => (
+              item === '...' ? (
+                <span key={`ellipsis-${index}`} className="text-on-surface-variant px-2">...</span>
+              ) : (
+                <button 
+                  key={item}
+                  onClick={() => setCurrentPage(item as number)}
+                  className={`w-10 h-10 flex items-center justify-center rounded-full text-sm font-bold transition-colors shadow-sm ${
+                    currentPage === item 
+                      ? 'bg-primary text-on-primary' 
+                      : 'text-on-surface-variant hover:bg-surface-container border border-transparent'
+                  }`}
+                >
+                  {(item as number) + 1}
+                </button>
+              )
             ))}
             
             <button 
               onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))}
               disabled={currentPage === totalPages - 1}
               className="w-10 h-10 flex items-center justify-center rounded-full border border-outline-variant text-on-surface-variant hover:bg-surface-container transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              title="Next Page"
             >
               <ChevronRight size={20} />
+            </button>
+            <button 
+              onClick={() => setCurrentPage(totalPages - 1)}
+              disabled={currentPage === totalPages - 1}
+              className="w-10 h-10 flex items-center justify-center rounded-full border border-outline-variant text-on-surface-variant hover:bg-surface-container transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              title="Last Page"
+            >
+              <ChevronsRight size={20} />
             </button>
           </div>
         )}
