@@ -1,12 +1,14 @@
 package com.unipath.university.controller;
 
 import com.unipath.common.response.ApiResponse;
+import com.unipath.common.response.PageResponse;
 import com.unipath.university.dto.ProgramResponseDto;
 import com.unipath.university.service.ProgramService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -19,8 +21,11 @@ public class ProgramController {
     private final ProgramService programService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<ProgramResponseDto>>> getAllPrograms() {
-        List<ProgramResponseDto> programs = programService.getAllPrograms();
+    public ResponseEntity<ApiResponse<PageResponse<ProgramResponseDto>>> getAllPrograms(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        PageResponse<ProgramResponseDto> programs = programService.getAllPrograms(page, size);
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách ngành học thành công", programs));
     }
 }

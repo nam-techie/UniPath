@@ -40,6 +40,7 @@ com\unipath\university\controller\UniversityController.class
 com\unipath\university\entity\Program.class
 com\unipath\auth\dto\ResendVerificationRequest.class
 com\unipath\profile\entity\SubjectScore.class
+com\unipath\common\response\PageResponse.class
 com\unipath\geography\entity\Province.class
 com\unipath\common\response\FieldErrorResponse.class
 com\unipath\tuition\entity\ProgramTuitionFee.class
@@ -96,6 +97,7 @@ com\unipath\profile\entity\SubjectScore$SubjectScoreBuilder.class
 com\unipath\auth\dto\ResendVerificationResponse.class
 com\unipath\common\response\ApiResponse.class
 com\unipath\university\service\UniversityService.class
+com\unipath\common\response\PageResponse$PageResponseBuilder.class
 com\unipath\auth\service\EmailVerificationService.class
 com\unipath\auth\dto\AuthResponse.class
 com\unipath\auth\dto\ResetPasswordRequest.class

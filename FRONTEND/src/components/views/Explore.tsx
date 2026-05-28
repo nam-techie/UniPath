@@ -16,15 +16,23 @@ export default function Explore({ onProgramClick }: ExploreProps) {
   const [universities, setUniversities] = useState<University[]>([]);
   const [programs, setPrograms] = useState<ProgramResponse[]>([]);
   const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+
+  const handleTabChange = (tab: 'programmes' | 'universities' | 'scholarships') => {
+    setActiveTab(tab);
+    setCurrentPage(0);
+  };
 
   useEffect(() => {
     if (activeTab === 'universities') {
       const fetchUniversities = async () => {
         try {
           setLoading(true);
-          const response = await universityService.getAllUniversities();
+          const response = await universityService.getAllUniversities(currentPage, 10);
           if (response.success) {
-            setUniversities(response.data);
+            setUniversities(response.data.content);
+            setTotalPages(response.data.totalPages);
           }
         } catch (error) {
           console.error("Failed to fetch universities:", error);
@@ -37,9 +45,10 @@ export default function Explore({ onProgramClick }: ExploreProps) {
       const fetchPrograms = async () => {
         try {
           setLoading(true);
-          const response = await programService.getAllPrograms();
+          const response = await programService.getAllPrograms(currentPage, 10);
           if (response.success) {
-            setPrograms(response.data);
+            setPrograms(response.data.content);
+            setTotalPages(response.data.totalPages);
           }
         } catch (error) {
           console.error("Failed to fetch programs:", error);
@@ -49,7 +58,7 @@ export default function Explore({ onProgramClick }: ExploreProps) {
       };
       fetchPrograms();
     }
-  }, [activeTab]);
+  }, [activeTab, currentPage]);
 
   // Removed mock programs array
 
@@ -143,7 +152,7 @@ export default function Explore({ onProgramClick }: ExploreProps) {
             {tabs.map(tab => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => handleTabChange(tab.id)}
                 className={`text-sm font-medium pb-2 whitespace-nowrap transition-colors border-b-2 -mb-px ${
                   activeTab === tab.id
                     ? 'text-primary border-primary font-bold'
@@ -302,19 +311,39 @@ export default function Explore({ onProgramClick }: ExploreProps) {
         </div>
 
         {/* Pagination */}
-        <div className="mt-12 flex justify-center items-center gap-2">
-          <button className="w-10 h-10 flex items-center justify-center rounded-full border border-outline-variant text-on-surface-variant hover:bg-surface-container transition-colors disabled:opacity-30" disabled>
-            <ChevronLeft size={20} />
-          </button>
-          <button className="w-10 h-10 flex items-center justify-center rounded-full bg-primary text-on-primary font-bold text-sm shadow-sm">1</button>
-          <button className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container text-on-surface-variant text-sm transition-colors border border-transparent">2</button>
-          <button className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container text-on-surface-variant text-sm transition-colors border border-transparent">3</button>
-          <span className="text-on-surface-variant px-2">...</span>
-          <button className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container text-on-surface-variant text-sm transition-colors border border-transparent">15</button>
-          <button className="w-10 h-10 flex items-center justify-center rounded-full border border-outline-variant text-on-surface-variant hover:bg-surface-container transition-colors">
-            <ChevronRight size={20} />
-          </button>
-        </div>
+        {totalPages > 0 && (
+          <div className="mt-12 flex justify-center items-center gap-2">
+            <button 
+              onClick={() => setCurrentPage(p => Math.max(0, p - 1))}
+              disabled={currentPage === 0}
+              className="w-10 h-10 flex items-center justify-center rounded-full border border-outline-variant text-on-surface-variant hover:bg-surface-container transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              <ChevronLeft size={20} />
+            </button>
+            
+            {Array.from({ length: totalPages }, (_, i) => (
+              <button 
+                key={i}
+                onClick={() => setCurrentPage(i)}
+                className={`w-10 h-10 flex items-center justify-center rounded-full text-sm font-bold transition-colors shadow-sm ${
+                  currentPage === i 
+                    ? 'bg-primary text-on-primary' 
+                    : 'text-on-surface-variant hover:bg-surface-container border border-transparent'
+                }`}
+              >
+                {i + 1}
+              </button>
+            ))}
+            
+            <button 
+              onClick={() => setCurrentPage(p => Math.min(totalPages - 1, p + 1))}
+              disabled={currentPage === totalPages - 1}
+              className="w-10 h-10 flex items-center justify-center rounded-full border border-outline-variant text-on-surface-variant hover:bg-surface-container transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+            >
+              <ChevronRight size={20} />
+            </button>
+          </div>
+        )}
 
         {/* Footer */}
         <footer className="mt-16 pt-8 border-t border-outline-variant">

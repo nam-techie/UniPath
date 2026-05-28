@@ -53,6 +53,7 @@ D:\Own project\UniPath\BACKEND\src\main\java\com\unipath\common\exception\Busine
 D:\Own project\UniPath\BACKEND\src\main\java\com\unipath\common\exception\GlobalExceptionHandler.java
 D:\Own project\UniPath\BACKEND\src\main\java\com\unipath\common\response\ApiResponse.java
 D:\Own project\UniPath\BACKEND\src\main\java\com\unipath\common\response\FieldErrorResponse.java
+D:\Own project\UniPath\BACKEND\src\main\java\com\unipath\common\response\PageResponse.java
 D:\Own project\UniPath\BACKEND\src\main\java\com\unipath\common\util\TokenHashUtil.java
 D:\Own project\UniPath\BACKEND\src\main\java\com\unipath\config\OpenApiConfig.java
 D:\Own project\UniPath\BACKEND\src\main\java\com\unipath\config\SecurityConfig.java

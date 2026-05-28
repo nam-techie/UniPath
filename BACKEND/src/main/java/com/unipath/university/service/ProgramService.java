@@ -1,11 +1,14 @@
 package com.unipath.university.service;
 
+import com.unipath.common.response.PageResponse;
 import com.unipath.university.dto.ProgramResponseDto;
 import com.unipath.university.entity.Program;
 import com.unipath.university.entity.University;
 import com.unipath.university.repository.ProgramRepository;
 import com.unipath.university.repository.UniversityRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,14 +22,14 @@ public class ProgramService {
     private final ProgramRepository programRepository;
     private final UniversityRepository universityRepository;
 
-    public List<ProgramResponseDto> getAllPrograms() {
-        List<Program> programs = programRepository.findAll();
+    public PageResponse<ProgramResponseDto> getAllPrograms(int page, int size) {
+        Page<Program> pageResult = programRepository.findAll(PageRequest.of(page, size));
         List<University> universities = universityRepository.findAll();
 
         Map<String, University> universityMap = universities.stream()
                 .collect(Collectors.toMap(University::getId, uni -> uni));
 
-        return programs.stream().map(program -> {
+        List<ProgramResponseDto> content = pageResult.getContent().stream().map(program -> {
             University uni = universityMap.get(program.getUniversityId());
             return ProgramResponseDto.builder()
                     .id(program.getId())
@@ -42,5 +45,14 @@ public class ProgramService {
                     .tuitionFees(program.getTuitionFees())
                     .build();
         }).collect(Collectors.toList());
+
+        return PageResponse.<ProgramResponseDto>builder()
+                .content(content)
+                .pageNo(pageResult.getNumber())
+                .pageSize(pageResult.getSize())
+                .totalElements(pageResult.getTotalElements())
+                .totalPages(pageResult.getTotalPages())
+                .last(pageResult.isLast())
+                .build();
     }
 }

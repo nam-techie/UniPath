@@ -1,12 +1,14 @@
 package com.unipath.university.controller;
 
 import com.unipath.common.response.ApiResponse;
+import com.unipath.common.response.PageResponse;
 import com.unipath.university.entity.University;
 import com.unipath.university.service.UniversityService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -19,8 +21,11 @@ public class UniversityController {
     private final UniversityService universityService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<University>>> getAllUniversities() {
-        List<University> universities = universityService.getAllUniversities();
+    public ResponseEntity<ApiResponse<PageResponse<University>>> getAllUniversities(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        PageResponse<University> universities = universityService.getAllUniversities(page, size);
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách trường thành công", universities));
     }
 }
