@@ -1,5 +1,6 @@
 package com.unipath.university.controller;
 
+import com.unipath.common.response.ApiResponse;
 import com.unipath.university.entity.University;
 import com.unipath.university.service.UniversityService;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,8 @@ public class UniversityController {
     private final UniversityService universityService;
 
     @GetMapping
-    public ResponseEntity<List<University>> getAllUniversities() {
-        return ResponseEntity.ok(universityService.getAllUniversities());
+    public ResponseEntity<ApiResponse<List<University>>> getAllUniversities() {
+        List<University> universities = universityService.getAllUniversities();
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách trường thành công", universities));
     }
 }

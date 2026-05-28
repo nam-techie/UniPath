@@ -3,6 +3,8 @@ import { motion } from 'motion/react';
 import { useState, useEffect } from 'react';
 import { University } from '../../types/university';
 import { universityService } from '../../services/universityService';
+import { ProgramResponse } from '../../types/program';
+import { programService } from '../../services/programService';
 
 interface ExploreProps {
   onProgramClick: () => void;
@@ -12,6 +14,7 @@ export default function Explore({ onProgramClick }: ExploreProps) {
   const [activeTab, setActiveTab] = useState<'programmes' | 'universities' | 'scholarships'>('universities');
   const [activeDegree, setActiveDegree] = useState<string>('Undergraduate');
   const [universities, setUniversities] = useState<University[]>([]);
+  const [programs, setPrograms] = useState<ProgramResponse[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -30,39 +33,25 @@ export default function Explore({ onProgramClick }: ExploreProps) {
         }
       };
       fetchUniversities();
+    } else if (activeTab === 'programmes') {
+      const fetchPrograms = async () => {
+        try {
+          setLoading(true);
+          const response = await programService.getAllPrograms();
+          if (response.success) {
+            setPrograms(response.data);
+          }
+        } catch (error) {
+          console.error("Failed to fetch programs:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchPrograms();
     }
   }, [activeTab]);
 
-  const programs = [
-    {
-      id: 1,
-      university: 'Curtin University',
-      rating: 4.3,
-      reviews: 70,
-      location: 'Perth, Australia +1',
-      rank: 'Top 1% in Worldwide',
-      title: 'Bachelor of Science (Science)',
-      description: 'This Bachelor of Science (Science) degree from Curtin University is designed to be a flexible degree that can respond to new and unpredictable...',
-      tags: ['B.Sc.', 'Full-time +2', 'On-campus'],
-      duration: '3 years',
-      tuition: '₫833,078,384',
-      logo: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDr_hDixNEfys1RoRmEQY1DlxhGopfJcP71To3aJGGCny_bWZPf8NuReVyABzpbmn2nQCdqfxC8dHOX_sfDwpzxUKoHUcoak-qOd12abimESwhg34OQyMTtX4Jzm2PQB-tE9ymWqYu3-DMfSov4Ft-bXCeDxtIzXGiGDdL3oJAA9No6AZzg_tX8bdNz72mKmuUJdI_WzdLZ9A38fBYtkKMIGSwAuYtv9jd8OOAY33VgBAWr73lCtwMVn7LVU8u66IkQqNHdIF3DgEkG'
-    },
-    {
-      id: 2,
-      university: 'Federation University Australia',
-      rating: 4.1,
-      reviews: 33,
-      location: 'Ballarat, Australia +1',
-      rank: 'Top 6% in Worldwide',
-      title: 'Information Technology (AI and Data Science)',
-      description: 'This Information Technology (AI and Data Science) programme from Federation University Australia gives you a broad knowledge applica...',
-      tags: ['Bachelor', 'Full-time +2', 'On-campus +2'],
-      duration: '3 years',
-      tuition: '₫779,915,994',
-      logo: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDr_hDixNEfys1RoRmEQY1DlxhGopfJcP71To3aJGGCny_bWZPf8NuReVyABzpbmn2nQCdqfxC8dHOX_sfDwpzxUKoHUcoak-qOd12abimESwhg34OQyMTtX4Jzm2PQB-tE9ymWqYu3-DMfSov4Ft-bXCeDxtIzXGiGDdL3oJAA9No6AZzg_tX8bdNz72mKmuUJdI_WzdLZ9A38fBYtkKMIGSwAuYtv9jd8OOAY33VgBAWr73lCtwMVn7LVU8u66IkQqNHdIF3DgEkG'
-    }
-  ];
+  // Removed mock programs array
 
   const tabs = [
     { id: 'programmes' as const, label: 'Programmes' },
@@ -147,7 +136,7 @@ export default function Explore({ onProgramClick }: ExploreProps) {
       <section className="flex-grow">
         <div className="mb-6">
           <h1 className="text-2xl font-bold text-on-surface">
-            {activeTab === 'universities' ? `Explore ${universities.length > 0 ? universities.length : ''} Universities in Vietnam` : "633 Bachelor's degrees in Computer Science & IT in Australia"}
+            {activeTab === 'universities' ? `Explore ${universities.length > 0 ? universities.length : ''} Universities in Vietnam` : `Explore ${programs.length > 0 ? programs.length : ''} Programmes in Vietnam`}
           </h1>
           {/* Tab bar — matching Figma */}
           <div className="flex items-center gap-6 mt-4 border-b border-outline-variant overflow-x-auto no-scrollbar">
@@ -238,65 +227,77 @@ export default function Explore({ onProgramClick }: ExploreProps) {
               <div className="flex justify-center p-8 text-on-surface-variant font-medium">Chưa có dữ liệu trường đại học.</div>
             )
           ) : (
-            programs.map((program, idx) => (
-            <motion.article 
-              key={program.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.1 }}
-              className="bg-surface rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow relative p-4"
-            >
-              <button className="absolute top-4 right-4 text-on-surface-variant hover:text-error transition-colors">
-                <Heart size={20} />
-              </button>
-              <div className="flex gap-4">
-                <div className="w-10 h-10 bg-background rounded-lg border border-outline-variant flex items-center justify-center flex-shrink-0">
-                  <img alt="Univ Logo" className="w-6 h-6 object-contain" src={program.logo} />
-                </div>
-                <div className="flex-grow">
-                  <div className="flex items-center gap-2 flex-wrap mb-1">
-                    <span className="text-sm text-on-surface font-semibold">{program.university}</span>
-                    <div className="flex items-center gap-0.5 text-on-surface text-[11px]">
-                      <span className="font-semibold">{program.rating}</span>
-                      <Star size={12} className="text-secondary fill-secondary" />
-                      <span className="text-on-surface-variant">({program.reviews})</span>
+            loading ? (
+              <div className="flex justify-center p-8 text-on-surface-variant font-medium">Đang tải danh sách ngành học...</div>
+            ) : programs.length > 0 ? (
+              programs.map((program, idx) => (
+                <motion.article 
+                  key={program.id || idx}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.1 }}
+                  className="bg-surface rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow relative p-4"
+                >
+                  <button className="absolute top-4 right-4 text-on-surface-variant hover:text-error transition-colors">
+                    <Heart size={20} />
+                  </button>
+                  <div className="flex gap-4">
+                    <div className="w-14 h-14 bg-background rounded-lg border border-outline-variant flex items-center justify-center flex-shrink-0 p-1">
+                      {program.universityLogo ? (
+                        <img alt={`${program.universityName} Logo`} className="w-full h-full object-contain" src={program.universityLogo} />
+                      ) : (
+                        <Building2 size={24} className="text-outline" />
+                      )}
                     </div>
-                  </div>
-                  <div className="text-[11px] leading-tight text-on-surface-variant flex gap-2">
-                    <span>{program.location}</span>
-                    <span className="text-outline">•</span>
-                    <span>{program.rank}</span>
-                  </div>
-                  <h2 
-                    onClick={onProgramClick}
-                    className="text-base font-bold text-on-surface mt-2 hover:text-primary cursor-pointer transition-colors"
-                  >
-                    {program.title}
-                  </h2>
-                  <p className="text-xs text-on-surface-variant mt-1 line-clamp-2 md:line-clamp-1">{program.description}</p>
-                  <div className="flex flex-wrap gap-1.5 mt-3">
-                    {program.tags.map(tag => (
-                      <span key={tag} className="bg-surface-container text-on-surface-variant px-2 py-0.5 rounded text-[10px] font-medium border border-outline-variant/30">{tag}</span>
-                    ))}
-                  </div>
-                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mt-4 gap-4">
-                    <span className="text-[11px] text-secondary font-semibold uppercase tracking-wider bg-secondary/10 px-2 py-0.5 rounded">Featured</span>
-                    <div className="text-right leading-tight w-full sm:w-auto">
-                      <div className="text-xs text-on-surface mb-1">
-                        {program.duration} • <span className="font-bold text-primary">{program.tuition}</span>/yr
+                    <div className="flex-grow">
+                      <div className="flex items-center gap-2 flex-wrap mb-1">
+                        <span className="text-sm text-on-surface font-semibold">{program.universityName}</span>
                       </div>
-                      <button 
+                      <div className="text-[11px] leading-tight text-on-surface-variant flex gap-2">
+                        <span>{program.universityCode}</span>
+                        {program.programType && (
+                          <>
+                            <span className="text-outline">•</span>
+                            <span>{program.programType}</span>
+                          </>
+                        )}
+                      </div>
+                      <h2 
                         onClick={onProgramClick}
-                        className="text-primary text-xs font-bold hover:underline"
+                        className="text-base font-bold text-on-surface mt-2 hover:text-primary cursor-pointer transition-colors"
                       >
-                        View Programme Information
-                      </button>
+                        {program.name}
+                      </h2>
+                      
+                      <div className="flex flex-wrap gap-1.5 mt-3">
+                        {program.admissionRequirements && program.admissionRequirements.map((req, i) => (
+                          <span key={i} className="bg-surface-container text-on-surface-variant px-2 py-0.5 rounded text-[10px] font-medium border border-outline-variant/30">
+                            {req.method === 'DIEM_THI' ? 'Thi THPT' : req.method} 
+                            {req.blocks && req.blocks.length > 0 ? ` (${req.blocks.join(', ')})` : ''} 
+                            {req.minScore ? `: ${req.minScore}` : ''}
+                          </span>
+                        ))}
+                      </div>
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mt-4 gap-4">
+                        <span className="text-[11px] text-secondary font-semibold uppercase tracking-wider bg-secondary/10 px-2 py-0.5 rounded">
+                           {program.tuitionFees && program.tuitionFees.length > 0 ? `${program.tuitionFees[0].amount.toLocaleString('vi-VN')} VND/${program.tuitionFees[0].period === 'NAM' ? 'năm' : 'kỳ'}` : 'Chưa có thông tin học phí'}
+                        </span>
+                        <div className="text-right leading-tight w-full sm:w-auto">
+                          <button 
+                            onClick={onProgramClick}
+                            className="text-primary text-xs font-bold hover:underline"
+                          >
+                            Xem chi tiết
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </div>
-            </motion.article>
-            ))
+                </motion.article>
+              ))
+            ) : (
+              <div className="flex justify-center p-8 text-on-surface-variant font-medium">Chưa có dữ liệu ngành học.</div>
+            )
           )}
         </div>
 
