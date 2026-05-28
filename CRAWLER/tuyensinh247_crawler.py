@@ -63,7 +63,7 @@ def extract_university_data(uni_name, uni_url, uni_code=None):
                         "method": "THPT_EXAM",
                         "blocks": parsed_blocks,
                         "minScore": min_score,
-                        "year": 2024 # Current latest benchmark year
+                        "year": 2025 # Current latest benchmark year
                     }
                 ]
             }
@@ -113,7 +113,7 @@ def crawl_main():
                 
     result_data = []
     for uni in target_unis:
-        data = extract_university_data(uni['name'], uni['url'])
+        data = extract_university_data(uni['name'], uni['url'], uni.get('code'))
         if data and data['programs']:
             result_data.append(data)
             
