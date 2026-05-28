@@ -14,4 +14,6 @@ public class TuitionFee {
     private Double amount;
     
     private String period; // e.g., PER_YEAR, PER_SEMESTER
+    
+    private Integer year;
 }
