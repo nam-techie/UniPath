@@ -1,33 +1,38 @@
 package com.unipath.profile.entity;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import java.util.List;
+import java.util.ArrayList;
 
-import com.unipath.common.enums.CurrencyCode;
-import com.unipath.common.enums.DegreeLevel;
-import com.unipath.user.entity.User;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Document(collection = "student_profiles")
 public class StudentProfile {
-
+    
     @Id
     private String id;
-    @DBRef
-    private User user;
-    private BigDecimal gpaValue;
-    private BigDecimal gpaScale;
-    private BigDecimal normalizedGpa;
-
-    private Integer graduationYear;
-    private DegreeLevel targetDegreeLevel;
-    private BigDecimal yearlyBudgetAmount;
-    private CurrencyCode budgetCurrency;
-    private Boolean scholarshipNeed;
-    private String careerGoal;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    
+    private String userId; // Reference to User
+    
+    private Double gpaValue;
+    
+    private String highSchoolTier;
+    
+    private Double yearlyBudgetAmount;
+    
+    @Builder.Default
+    private List<SubjectScore> subjectScores = new ArrayList<>();
+    
+    @Builder.Default
+    private List<TestScore> testScores = new ArrayList<>();
+    
+    @Builder.Default
+    private List<String> preferredProvinces = new ArrayList<>(); // List of Province IDs
 }

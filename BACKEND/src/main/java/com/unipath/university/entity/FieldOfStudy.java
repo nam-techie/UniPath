@@ -11,21 +11,13 @@ import lombok.Builder;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Document(collection = "universities")
-public class University {
+@Document(collection = "fields_of_study")
+public class FieldOfStudy {
     
     @Id
     private String id;
     
-    private String provinceId; // Reference to Province
-    
     private String name;
     
-    private String code; // e.g., BKA
-    
-    private String websiteUrl;
-    
-    private String institutionType; // e.g., Công lập, Tư thục
-    
-    private String logoUrl;
+    private String code; // Mã ngành Bộ GDĐT (7 số)
 }
