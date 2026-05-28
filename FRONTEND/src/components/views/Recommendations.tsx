@@ -131,10 +131,14 @@ export default function Recommendations({ onProgramClick }: RecommendationsProps
     reach: { label: 'Reach', color: 'bg-amber-100 text-amber-700 border-amber-300',         icon: TrendingUp,    bar: 'bg-amber-500' },
   };
 
+  const safeCount = recommendedPrograms.filter(p => p.type === 'safe').length;
+  const matchCount = recommendedPrograms.filter(p => p.type === 'match').length;
+  const reachCount = recommendedPrograms.filter(p => p.type === 'reach').length;
+
   const stats = [
-    { label: 'Safe Programs',  value: '2', sub: 'High acceptance probability',   color: 'text-emerald-600', bg: 'bg-emerald-50 border-emerald-200' },
-    { label: 'Match Programs', value: '2', sub: 'Strong fit with your profile',  color: 'text-secondary',   bg: 'bg-secondary/5 border-secondary/20' },
-    { label: 'Reach Programs', value: '1', sub: 'Stretch goals worth pursuing',  color: 'text-amber-600',   bg: 'bg-amber-50 border-amber-200' },
+    { label: 'Safe Programs',  value: safeCount.toString(), sub: 'High acceptance probability',   color: 'text-emerald-600', bg: 'bg-emerald-50 border-emerald-200' },
+    { label: 'Match Programs', value: matchCount.toString(), sub: 'Strong fit with your profile',  color: 'text-secondary',   bg: 'bg-secondary/5 border-secondary/20' },
+    { label: 'Reach Programs', value: reachCount.toString(), sub: 'Stretch goals worth pursuing',  color: 'text-amber-600',   bg: 'bg-amber-50 border-amber-200' },
   ];
 
   return (
