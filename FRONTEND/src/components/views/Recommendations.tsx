@@ -1,12 +1,72 @@
 import { BookOpen, CheckCircle2, Heart, Star, TrendingUp, Zap } from 'lucide-react';
 import { motion } from 'motion/react';
+import { useEffect, useState } from 'react';
+import { programService } from '../../services/programService';
 
 interface RecommendationsProps {
   onProgramClick: () => void;
 }
 
 export default function Recommendations({ onProgramClick }: RecommendationsProps) {
-  const programs = [
+  const [recommendedPrograms, setRecommendedPrograms] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchRecommendations = async () => {
+      const saved = localStorage.getItem('unipath_profile');
+      if (saved) {
+        const data = JSON.parse(saved);
+        if (data.studyTarget === 'domestic' && data.thptBlock && data.thptScore) {
+          setIsLoading(true);
+          try {
+            const response = await programService.getRecommendedPrograms(data.thptBlock, parseFloat(data.thptScore), 0, 10);
+            if (response.data && response.data.content) {
+              const mapped = response.data.content.map(p => {
+                // Find THPT req
+                const thptReq = p.admissionRequirements?.find(r => r.method === 'THPT_EXAM');
+                const minScore = thptReq ? thptReq.minScore : 0;
+                const scoreDiff = parseFloat(data.thptScore) - minScore;
+                
+                let type = 'match';
+                let matchScore = 80;
+                if (scoreDiff >= 2) { type = 'safe'; matchScore = 95; }
+                else if (scoreDiff < 0.5) { type = 'reach'; matchScore = 70; }
+                else { matchScore = 85 + Math.round(scoreDiff * 5); }
+
+                return {
+                  id: p.id,
+                  type,
+                  university: p.universityName,
+                  location: 'Vietnam',
+                  logo: p.universityLogo || 'https://via.placeholder.com/150',
+                  program: p.name,
+                  matchScore,
+                  tags: [p.programType || 'Standard', data.thptBlock],
+                  tuition: p.tuitionFees?.length ? `${p.tuitionFees[0].amount} VND` : 'Contact details',
+                  ielts: 'N/A',
+                  deadline: 'Upcoming',
+                  scholarships: [],
+                  minScore
+                };
+              });
+              setRecommendedPrograms(mapped);
+            }
+          } catch (error) {
+            console.error('Failed to fetch recommendations', error);
+          } finally {
+            setIsLoading(false);
+          }
+          return;
+        }
+      }
+      // Default mock for abroad or empty profile
+      setRecommendedPrograms(mockPrograms);
+    };
+
+    fetchRecommendations();
+  }, []);
+
+  const mockPrograms = [
     {
       id: 1,
       type: 'safe' as const,
@@ -92,7 +152,13 @@ export default function Recommendations({ onProgramClick }: RecommendationsProps
         </div>
       </motion.div>
 
-      {/* Summary stats */}
+      {isLoading ? (
+        <div className="flex justify-center items-center py-20">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      ) : (
+        <>
+          {/* Summary stats */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
         {stats.map((s, i) => (
           <motion.div
@@ -111,8 +177,8 @@ export default function Recommendations({ onProgramClick }: RecommendationsProps
 
       {/* Program cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {programs.map((prog, idx) => {
-          const cfg = typeConfig[prog.type];
+        {recommendedPrograms.map((prog, idx) => {
+          const cfg = typeConfig[prog.type as keyof typeof typeConfig] || typeConfig.match;
           const TypeIcon = cfg.icon;
           return (
             <motion.article
@@ -185,8 +251,8 @@ export default function Recommendations({ onProgramClick }: RecommendationsProps
                     <p className="font-bold text-on-surface text-[11px] leading-tight">{prog.tuition}</p>
                   </div>
                   <div className="bg-surface-container-low rounded-lg p-2.5">
-                    <p className="text-outline uppercase tracking-wider font-bold text-[9px] mb-1">IELTS</p>
-                    <p className="font-bold text-on-surface text-[11px]">{prog.ielts}+</p>
+                    <p className="text-outline uppercase tracking-wider font-bold text-[9px] mb-1">Required Score</p>
+                    <p className="font-bold text-on-surface text-[11px]">{prog.minScore ? `${prog.minScore}` : prog.ielts}</p>
                   </div>
                   <div className="bg-surface-container-low rounded-lg p-2.5">
                     <p className="text-outline uppercase tracking-wider font-bold text-[9px] mb-1">Deadline</p>
@@ -223,6 +289,8 @@ export default function Recommendations({ onProgramClick }: RecommendationsProps
           );
         })}
       </div>
+        </>
+      )}
 
       {/* Footer */}
       <footer className="mt-16 pt-8 border-t border-outline-variant">

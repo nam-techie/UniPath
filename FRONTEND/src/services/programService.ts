@@ -8,4 +8,9 @@ export const programService = {
       method: 'GET',
     });
   },
+  getRecommendedPrograms: async (block: string, score: number, page: number = 0, size: number = 10) => {
+    return apiRequest<PageResponse<ProgramResponse>>(`/programs/recommend?block=${block}&score=${score}&page=${page}&size=${size}`, {
+      method: 'GET',
+    });
+  },
 };

@@ -24,6 +24,15 @@ public class ProgramService {
 
     public PageResponse<ProgramResponseDto> getAllPrograms(int page, int size) {
         Page<Program> pageResult = programRepository.findAll(PageRequest.of(page, size));
+        return mapToPageResponse(pageResult);
+    }
+
+    public PageResponse<ProgramResponseDto> getRecommendedPrograms(String block, Double score, int page, int size) {
+        Page<Program> pageResult = programRepository.findRecommendedPrograms(block, score, PageRequest.of(page, size));
+        return mapToPageResponse(pageResult);
+    }
+
+    private PageResponse<ProgramResponseDto> mapToPageResponse(Page<Program> pageResult) {
         List<University> universities = universityRepository.findAll();
 
         Map<String, University> universityMap = universities.stream()

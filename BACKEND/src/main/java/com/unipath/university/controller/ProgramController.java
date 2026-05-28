@@ -28,4 +28,15 @@ public class ProgramController {
         PageResponse<ProgramResponseDto> programs = programService.getAllPrograms(page, size);
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách ngành học thành công", programs));
     }
+
+    @GetMapping("/recommend")
+    public ResponseEntity<ApiResponse<PageResponse<ProgramResponseDto>>> getRecommendedPrograms(
+            @RequestParam String block,
+            @RequestParam Double score,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        PageResponse<ProgramResponseDto> programs = programService.getRecommendedPrograms(block, score, page, size);
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách ngành học gợi ý thành công", programs));
+    }
 }
