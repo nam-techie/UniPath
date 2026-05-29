@@ -23,10 +23,15 @@ public class ProgramController {
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<ProgramResponseDto>>> getAllPrograms(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String regionId,
+            @RequestParam(required = false) String provinceId,
+            @RequestParam(required = false) String fieldOfStudy,
+            @RequestParam(required = false) Double minTuition,
+            @RequestParam(required = false) Double maxTuition
     ) {
-        PageResponse<ProgramResponseDto> programs = programService.getAllPrograms(page, size);
-        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách ngành học thành công", programs));
+        PageResponse<ProgramResponseDto> response = programService.getAllPrograms(page, size, regionId, provinceId, fieldOfStudy, minTuition, maxTuition);
+        return ResponseEntity.ok(ApiResponse.success("Lấy danh sách ngành học thành công", response));
     }
 
     @GetMapping("/recommend")

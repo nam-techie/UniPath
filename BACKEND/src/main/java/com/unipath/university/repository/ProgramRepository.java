@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ProgramRepository extends MongoRepository<Program, String> {
+public interface ProgramRepository extends MongoRepository<Program, String>, ProgramRepositoryCustom {
     List<Program> findByUniversityId(String universityId);
     void deleteByUniversityId(String universityId);
     List<Program> findByFieldOfStudyId(String fieldOfStudyId);

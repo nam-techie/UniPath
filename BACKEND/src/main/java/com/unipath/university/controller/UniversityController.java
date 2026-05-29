@@ -23,9 +23,11 @@ public class UniversityController {
     @GetMapping
     public ResponseEntity<ApiResponse<PageResponse<University>>> getAllUniversities(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String regionId,
+            @RequestParam(required = false) String provinceId
     ) {
-        PageResponse<University> universities = universityService.getAllUniversities(page, size);
+        PageResponse<University> universities = universityService.getAllUniversities(page, size, regionId, provinceId);
         return ResponseEntity.ok(ApiResponse.success("Lấy danh sách trường thành công", universities));
     }
 }

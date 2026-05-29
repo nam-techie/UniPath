@@ -16,8 +16,8 @@ public class UniversityService {
 
     private final UniversityRepository universityRepository;
 
-    public PageResponse<University> getAllUniversities(int page, int size) {
-        Page<University> pageResult = universityRepository.findAll(PageRequest.of(page, size));
+    public PageResponse<University> getAllUniversities(int page, int size, String regionId, String provinceId) {
+        Page<University> pageResult = universityRepository.findWithFilters(regionId, provinceId, PageRequest.of(page, size));
         return PageResponse.<University>builder()
                 .content(pageResult.getContent())
                 .pageNo(pageResult.getNumber())

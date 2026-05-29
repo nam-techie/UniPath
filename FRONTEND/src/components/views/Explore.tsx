@@ -5,6 +5,7 @@ import { University } from '../../types/university';
 import { universityService } from '../../services/universityService';
 import { ProgramResponse } from '../../types/program';
 import { programService } from '../../services/programService';
+import { locationService, Region, Province } from '../../services/locationService';
 
 interface ExploreProps {
   onProgramClick: () => void;
@@ -18,6 +19,23 @@ export default function Explore({ onProgramClick }: ExploreProps) {
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+
+  // Filter States
+  const [regions, setRegions] = useState<Region[]>([]);
+  const [provinces, setProvinces] = useState<Province[]>([]);
+  
+  const [selectedRegion, setSelectedRegion] = useState<string>('');
+  const [selectedProvince, setSelectedProvince] = useState<string>('');
+  const [selectedField, setSelectedField] = useState<string>('All');
+  const [selectedTuition, setSelectedTuition] = useState<string>('All');
+
+  const tuitionRanges: Record<string, { min?: number, max?: number }> = {
+    'All': {},
+    'Dưới 20 triệu': { max: 20000000 },
+    '20 - 40 triệu': { min: 20000000, max: 40000000 },
+    '40 - 60 triệu': { min: 40000000, max: 60000000 },
+    'Trên 60 triệu': { min: 60000000 }
+  };
 
   const getPaginationItems = () => {
     const items: (number | string)[] = [];
@@ -47,11 +65,24 @@ export default function Explore({ onProgramClick }: ExploreProps) {
   };
 
   useEffect(() => {
+    locationService.getRegions().then(res => {
+      if (res.success) setRegions(res.data);
+    });
+  }, []);
+
+  useEffect(() => {
+    locationService.getProvinces(selectedRegion).then(res => {
+      if (res.success) setProvinces(res.data);
+    });
+    setSelectedProvince('');
+  }, [selectedRegion]);
+
+  useEffect(() => {
     if (activeTab === 'universities') {
       const fetchUniversities = async () => {
         try {
           setLoading(true);
-          const response = await universityService.getAllUniversities(currentPage, 10);
+          const response = await universityService.getAllUniversities(currentPage, 10, selectedRegion, selectedProvince);
           if (response.success) {
             setUniversities(response.data.content);
             setTotalPages(response.data.totalPages);
@@ -67,7 +98,10 @@ export default function Explore({ onProgramClick }: ExploreProps) {
       const fetchPrograms = async () => {
         try {
           setLoading(true);
-          const response = await programService.getAllPrograms(currentPage, 10);
+          const { min, max } = tuitionRanges[selectedTuition] || {};
+          const fieldToPass = selectedField === 'All' ? undefined : selectedField;
+          
+          const response = await programService.getAllPrograms(currentPage, 10, selectedRegion, selectedProvince, fieldToPass, min, max);
           if (response.success) {
             setPrograms(response.data.content);
             setTotalPages(response.data.totalPages);
@@ -80,7 +114,7 @@ export default function Explore({ onProgramClick }: ExploreProps) {
       };
       fetchPrograms();
     }
-  }, [activeTab, currentPage]);
+  }, [activeTab, currentPage, selectedRegion, selectedProvince, selectedField, selectedTuition]);
 
   // Removed mock programs array
 
@@ -100,47 +134,70 @@ export default function Explore({ onProgramClick }: ExploreProps) {
           <h2 className="text-base font-bold text-on-surface mb-6">Filters</h2>
           
           <div className="mb-6 border-b border-outline-variant pb-6">
-            <h3 className="text-sm font-semibold text-on-surface mb-3">Country</h3>
-            <div className="space-y-2">
-              {['USA', 'Canada', 'Australia', 'UK', 'Singapore'].map(country => (
-                <label key={country} className="flex items-center gap-3 cursor-pointer group">
-                  <input 
-                    type="checkbox" 
-                    className="w-4 h-4 text-primary rounded border-outline-variant focus:ring-primary accent-primary" 
-                    defaultChecked={country === 'USA'}
-                  />
-                  <span className="text-sm text-on-surface-variant group-hover:text-primary transition-colors">{country}</span>
-                </label>
+            <h3 className="text-sm font-semibold text-on-surface mb-3">Khu vực</h3>
+            <select 
+              value={selectedRegion}
+              onChange={(e) => setSelectedRegion(e.target.value)}
+              className="w-full border border-outline-variant rounded-md px-3 py-2 text-sm text-on-surface-variant bg-background focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+            >
+              <option value="">Tất cả khu vực</option>
+              {regions.map(r => (
+                <option key={r.id} value={r.id}>{r.name}</option>
               ))}
-            </div>
-          </div>
-
-          <div className="mb-6 border-b border-outline-variant pb-6">
-            <h3 className="text-sm font-semibold text-on-surface mb-3">Field of Study</h3>
-            <select className="w-full border border-outline-variant rounded-md px-3 py-2 text-sm text-on-surface-variant bg-background focus:border-primary focus:ring-1 focus:ring-primary outline-none">
-              <option>Computer Science</option>
-              <option>Business Administration</option>
-              <option>Engineering</option>
-              <option>Medicine</option>
             </select>
           </div>
 
           <div className="mb-6 border-b border-outline-variant pb-6">
-            <h3 className="text-sm font-semibold text-on-surface mb-3">Tuition Budget (per year)</h3>
-            <div className="space-y-2">
-              {['Under $20k', '$20k - $40k', '$40k - $60k', 'Over $60k'].map(budget => (
-                <label key={budget} className="flex items-center gap-3 cursor-pointer group">
-                  <input 
-                    type="radio" 
-                    name="budget"
-                    className="w-4 h-4 text-primary border-outline-variant focus:ring-primary accent-primary" 
-                    defaultChecked={budget === '$20k - $40k'}
-                  />
-                  <span className="text-sm text-on-surface-variant group-hover:text-primary transition-colors">{budget}</span>
-                </label>
+            <h3 className="text-sm font-semibold text-on-surface mb-3">Tỉnh/Thành phố</h3>
+            <select 
+              value={selectedProvince}
+              onChange={(e) => setSelectedProvince(e.target.value)}
+              className="w-full border border-outline-variant rounded-md px-3 py-2 text-sm text-on-surface-variant bg-background focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+            >
+              <option value="">Tất cả Tỉnh/Thành</option>
+              {provinces.map(p => (
+                <option key={p.id} value={p.id}>{p.name}</option>
               ))}
-            </div>
+            </select>
           </div>
+
+          {activeTab === 'programmes' && (
+            <>
+              <div className="mb-6 border-b border-outline-variant pb-6">
+                <h3 className="text-sm font-semibold text-on-surface mb-3">Ngành học</h3>
+                <select 
+                  value={selectedField}
+                  onChange={(e) => setSelectedField(e.target.value)}
+                  className="w-full border border-outline-variant rounded-md px-3 py-2 text-sm text-on-surface-variant bg-background focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+                >
+                  <option value="All">Tất cả ngành học</option>
+                  <option value="Computer Science">Công nghệ thông tin</option>
+                  <option value="Business Administration">Quản trị kinh doanh</option>
+                  <option value="Engineering">Kỹ thuật</option>
+                  <option value="Medicine">Y Dược</option>
+                </select>
+              </div>
+
+              <div className="mb-6 border-b border-outline-variant pb-6">
+                <h3 className="text-sm font-semibold text-on-surface mb-3">Học phí (mỗi năm)</h3>
+                <div className="space-y-2">
+                  {Object.keys(tuitionRanges).map(budget => (
+                    <label key={budget} className="flex items-center gap-3 cursor-pointer group">
+                      <input 
+                        type="radio" 
+                        name="budget"
+                        value={budget}
+                        checked={selectedTuition === budget}
+                        onChange={(e) => setSelectedTuition(e.target.value)}
+                        className="w-4 h-4 text-primary border-outline-variant focus:ring-primary accent-primary" 
+                      />
+                      <span className="text-sm text-on-surface-variant group-hover:text-primary transition-colors">{budget === 'All' ? 'Tất cả mức học phí' : budget}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
 
           <div>
             <h3 className="text-sm font-semibold text-on-surface mb-3">Degree Level</h3>

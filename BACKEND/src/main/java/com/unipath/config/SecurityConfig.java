@@ -55,7 +55,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, 
                                 "/api/v1/auth/verify-email",
                                 "/api/v1/universities/**",
-                                "/api/v1/programs/**"
+                                "/api/v1/programs/**",
+                                "/api/v1/locations/**",
+                                "/api/v1/scholarships/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

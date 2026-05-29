@@ -22,8 +22,8 @@ public class ProgramService {
     private final ProgramRepository programRepository;
     private final UniversityRepository universityRepository;
 
-    public PageResponse<ProgramResponseDto> getAllPrograms(int page, int size) {
-        Page<Program> pageResult = programRepository.findAll(PageRequest.of(page, size));
+    public PageResponse<ProgramResponseDto> getAllPrograms(int page, int size, String regionId, String provinceId, String fieldOfStudy, Double minTuition, Double maxTuition) {
+        Page<Program> pageResult = programRepository.findWithFilters(regionId, provinceId, fieldOfStudy, minTuition, maxTuition, PageRequest.of(page, size));
         return mapToPageResponse(pageResult);
     }
 
