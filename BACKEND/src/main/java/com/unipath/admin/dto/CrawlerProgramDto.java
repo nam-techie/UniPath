@@ -1,6 +1,7 @@
 package com.unipath.admin.dto;
 
 import com.unipath.university.entity.AdmissionRequirement;
+import com.unipath.university.entity.TuitionFee;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -12,4 +13,5 @@ import java.util.List;
 public class CrawlerProgramDto {
     private String name;
     private List<AdmissionRequirement> admissionRequirements;
+    private List<TuitionFee> tuitionFees;
 }

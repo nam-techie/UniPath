@@ -24,4 +24,10 @@ public class CrawlerIngestionController {
             return ResponseEntity.badRequest().body("Error ingesting data: " + e.getMessage());
         }
     }
+
+    @DeleteMapping("/clear")
+    public ResponseEntity<String> clearData() {
+        ingestionService.clearAllData();
+        return ResponseEntity.ok("Cleared all universities and programs.");
+    }
 }

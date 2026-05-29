@@ -311,7 +311,7 @@ export default function Explore({ onProgramClick }: ExploreProps) {
                       </div>
                       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end mt-4 gap-4">
                         <span className="text-[11px] text-secondary font-semibold uppercase tracking-wider bg-secondary/10 px-2 py-0.5 rounded">
-                           {program.tuitionFees && program.tuitionFees.length > 0 ? `${program.tuitionFees[0].amount.toLocaleString('vi-VN')} VND/${program.tuitionFees[0].period === 'NAM' ? 'năm' : 'kỳ'}` : 'Chưa có thông tin học phí'}
+                           {program.tuitionFees && program.tuitionFees.length > 0 ? `${program.tuitionFees[0].amount.toLocaleString('vi-VN')} VND/${program.tuitionFees[0].period === 'PER_YEAR' ? 'năm' : 'kỳ'}` : 'Chưa cập nhật'}
                         </span>
                         <div className="text-right leading-tight w-full sm:w-auto">
                           <button 

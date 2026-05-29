@@ -42,7 +42,7 @@ export default function Recommendations({ onProgramClick }: RecommendationsProps
                   program: p.name,
                   matchScore,
                   tags: [p.programType || 'Standard', data.thptBlock],
-                  tuition: p.tuitionFees?.length ? `${p.tuitionFees[0].amount} VND` : 'Contact details',
+                  tuition: p.tuitionFees?.length ? `${p.tuitionFees[0].amount.toLocaleString('vi-VN')} VND` : 'Chưa cập nhật',
                   ielts: 'N/A',
                   deadline: 'Upcoming',
                   scholarships: [],

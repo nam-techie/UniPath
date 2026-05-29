@@ -12,6 +12,7 @@ import java.util.List;
 @Repository
 public interface ProgramRepository extends MongoRepository<Program, String> {
     List<Program> findByUniversityId(String universityId);
+    void deleteByUniversityId(String universityId);
     List<Program> findByFieldOfStudyId(String fieldOfStudyId);
 
     @Query("{'admissionRequirements': {$elemMatch: {'method': 'THPT_EXAM', 'blocks': ?0, 'minScore': {$lte: ?1}}}}")

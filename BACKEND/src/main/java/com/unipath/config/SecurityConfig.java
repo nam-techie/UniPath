@@ -49,6 +49,9 @@ public class SecurityConfig {
                                 "/api/v1/auth/refresh",
                                 "/api/v1/auth/logout"
                         ).permitAll()
+                        .requestMatchers(HttpMethod.DELETE,
+                                "/api/v1/admin/crawler/clear"
+                        ).permitAll()
                         .requestMatchers(HttpMethod.GET, 
                                 "/api/v1/auth/verify-email",
                                 "/api/v1/universities/**",

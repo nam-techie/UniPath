@@ -34,14 +34,21 @@ public class CrawlerIngestionService {
             university = universityRepository.save(university);
             
             // Save Programs
+            programRepository.deleteByUniversityId(university.getId());
             for (CrawlerProgramDto progDto : dto.getPrograms()) {
                 Program program = new Program();
                 program.setUniversityId(university.getId());
                 program.setName(progDto.getName());
                 program.setAdmissionRequirements(progDto.getAdmissionRequirements());
+                program.setTuitionFees(progDto.getTuitionFees());
                 
                 programRepository.save(program);
             }
         }
+    }
+
+    public void clearAllData() {
+        universityRepository.deleteAll();
+        programRepository.deleteAll();
     }
 }
